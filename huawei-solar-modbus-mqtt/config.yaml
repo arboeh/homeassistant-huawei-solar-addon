@@ -1,7 +1,7 @@
 name: Huawei Solar Modbus to MQTT
 version: '0.9.0-beta'
 slug: huawei_solar_modbus_mqtt
-description: Query Huawei Solar Inverter via Modbus and publish to MQTT with auto-discovery (BETA)
+description: Huawei Solar Inverter via Modbus to MQTT with auto-discovery (BETA)
 url: https://github.com/arboeh/homeassistant-huawei-solar-addon
 arch:
   - aarch64

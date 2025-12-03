@@ -1,6 +1,8 @@
 MIT License
 
-Copyright (c) 2025 Arend Böhmer
+Copyright (c) 2025 arboeh
+
+Based on work by Marcus Jaschen (mjaschen), Copyright (c) 2024
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +21,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+[aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+[amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[armhf-shield]: https://img.shields.io/badge/armhf-yes-green.svg
+[armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
+[i386-shield]: https://img.shields.io/badge/i386-yes-green.svg
+[repository-badge]: https://img.shields.io/badge/Add%20to%20Home%20Assistant-Repository-blue
+[repository-url]: https://github.com/arboeh/homeassistant-huawei-solar-addon
+[issues]: https://github.com/arboeh/homeassistant-huawei-solar-addon/issues
+[forum]: https://community.home-assistant.io
