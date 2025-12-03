@@ -10,14 +10,19 @@ def logger():
 
 
 def get_mqtt_client():
-    """Create and configure MQTT client"""
+    """Create and configure MQTT client with LWT."""
     client = mqtt.Client()
 
-    mqtt_user = os.environ.get('HUAWEI_MODBUS_MQTT_USER')
-    mqtt_password = os.environ.get('HUAWEI_MODBUS_MQTT_PASSWORD')
+    mqtt_user = os.environ.get("HUAWEI_MODBUS_MQTT_USER")
+    mqtt_password = os.environ.get("HUAWEI_MODBUS_MQTT_PASSWORD")
 
     if mqtt_user and mqtt_password:
         client.username_pw_set(mqtt_user, mqtt_password)
+
+    base_topic = os.environ.get("HUAWEI_MODBUS_MQTT_TOPIC")
+    if base_topic:
+        # LWT: Falls der Client unerwartet disconnected, setzt der Broker den Status auf offline
+        client.will_set(f"{base_topic}/status", payload="offline", retain=True)
 
     return client
 
@@ -685,14 +690,13 @@ def publish_data(data, topic):
     client = get_mqtt_client()
 
     try:
-        mqtt_broker = os.environ.get('HUAWEI_MODBUS_MQTT_BROKER')
-        mqtt_port = int(os.environ.get('HUAWEI_MODBUS_MQTT_PORT', '1883'))
+        mqtt_broker = os.environ.get("HUAWEI_MODBUS_MQTT_BROKER")
+        mqtt_port = int(os.environ.get("HUAWEI_MODBUS_MQTT_PORT", "1883"))
 
         client.connect(mqtt_broker, mqtt_port, 60)
 
         # Add metadata
-        data['last_update'] = int(time.time())
-        data['status'] = 'online'
+        data["last_update"] = int(time.time())
 
         # Publish data
         client.publish(topic, json.dumps(data))

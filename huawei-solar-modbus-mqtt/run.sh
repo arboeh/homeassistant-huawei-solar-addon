@@ -1,12 +1,14 @@
 #!/usr/bin/with-contenv bashio
 
-bashio::log.info "Starting Huawei Solar Modbus to MQTT Add-on..."
+bashio::log.info "Starting Huawei Solar Modbus to MQTT Add On..."
 
 # Read config from Home Assistant
 export HUAWEI_MODBUS_HOST=$(bashio::config 'modbus_host')
 export HUAWEI_MODBUS_PORT=$(bashio::config 'modbus_port')
 export HUAWEI_MODBUS_DEVICE_ID=$(bashio::config 'modbus_device_id')
 export HUAWEI_MODBUS_MQTT_TOPIC=$(bashio::config 'mqtt_topic')
+export HUAWEI_STATUS_TIMEOUT=$(bashio::config 'status_timeout')
+export HUAWEI_POLL_INTERVAL=$(bashio::config 'poll_interval')
 
 # MQTT Config from Home Assistant Supervisor
 if bashio::config.has_value 'mqtt_host'; then
