@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Copy Python requirements and install
 COPY requirements.txt /app/
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY modbus_energy_meter /app/modbus_energy_meter
