@@ -69,12 +69,6 @@ Enable debug logging (default: false).
 ## MQTT Configuration
 
 The add-on automatically uses the MQTT broker configured in Home Assistant. No additional MQTT configuration needed!
-
-## Support
-
-- [Open an issue on GitHub][issues]
-- [Home Assistant Community Forum][forum]
-
 ## License
 
 MIT License
