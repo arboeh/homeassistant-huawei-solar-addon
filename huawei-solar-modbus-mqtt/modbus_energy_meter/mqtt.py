@@ -23,7 +23,7 @@ def get_mqtt_client():
 
 
 def publish_discovery_configs(base_topic):
-    """Publish Home Assistant MQTT Discovery configs"""
+    """Publish Home Assistant MQTT Discovery configs for all sensors"""
 
     client = get_mqtt_client()
 
@@ -40,64 +40,58 @@ def publish_discovery_configs(base_topic):
             "manufacturer": "Huawei"
         }
 
+        # === SENSOR DEFINITIONS ===
+        # enabled_by_default: false = Disabled by default (expert sensors)
+        # entity_category: "diagnostic" = Diagnostic sensor (less important)
+
         sensors = [
-            # Power
+            # === POWER (Main - Always Enabled) ===
             {
                 "name": "Solar Power",
                 "key": "power_active",
                 "unit": "W",
                 "device_class": "power",
                 "state_class": "measurement",
-                "icon": "mdi:solar-power"
-            },
-            {
-                "name": "Grid Power",
-                "key": "power_active_meter",
-                "unit": "W",
-                "device_class": "power",
-                "state_class": "measurement",
-                "icon": "mdi:transmission-tower"
-            },
-            {
-                "name": "Battery Power",
-                "key": "power_battery",
-                "unit": "W",
-                "device_class": "power",
-                "state_class": "measurement",
-                "icon": "mdi:battery-charging"
-            },
-            {
-                "name": "PV1 Power",
-                "key": "power_PV1",
-                "unit": "W",
-                "device_class": "power",
-                "state_class": "measurement",
-                "icon": "mdi:solar-panel"
-            },
-            {
-                "name": "PV2 Power",
-                "key": "power_PV2",
-                "unit": "W",
-                "device_class": "power",
-                "state_class": "measurement",
-                "icon": "mdi:solar-panel"
+                "icon": "mdi:solar-power",
+                "enabled": True
             },
             {
                 "name": "Input Power",
                 "key": "power_input",
                 "unit": "W",
                 "device_class": "power",
-                "state_class": "measurement"
+                "state_class": "measurement",
+                "icon": "mdi:solar-panel",
+                "enabled": True
+            },
+            {
+                "name": "Grid Power",
+                "key": "meter_power_active",
+                "unit": "W",
+                "device_class": "power",
+                "state_class": "measurement",
+                "icon": "mdi:transmission-tower",
+                "enabled": True
+            },
+            {
+                "name": "Battery Power",
+                "key": "battery_power",
+                "unit": "W",
+                "device_class": "power",
+                "state_class": "measurement",
+                "icon": "mdi:battery-charging",
+                "enabled": True
             },
 
-            # Energy
+            # === ENERGY (Main - Always Enabled) ===
             {
                 "name": "Solar Daily Yield",
-                "key": "enery_yield_day",
+                "key": "energy_yield_day",
                 "unit": "kWh",
                 "device_class": "energy",
                 "state_class": "total_increasing",
-                "icon": "mdi:solar-power"
+                "icon": "mdi:solar-power",
+                "enabled": True
             },
             {
                 "name": "Solar Total Yield",
@@ -105,179 +99,458 @@ def publish_discovery_configs(base_topic):
                 "unit": "kWh",
                 "device_class": "energy",
                 "state_class": "total_increasing",
-                "icon": "mdi:solar-power"
-            },
-            {
-                "name": "Grid Energy Accumulated",
-                "key": "energy_grid_accumulated",
-                "unit": "kWh",
-                "device_class": "energy",
-                "state_class": "total_increasing"
+                "icon": "mdi:solar-power",
+                "enabled": True
             },
             {
                 "name": "Grid Energy Exported",
                 "key": "energy_grid_exported",
                 "unit": "kWh",
                 "device_class": "energy",
-                "state_class": "total_increasing"
+                "state_class": "total_increasing",
+                "icon": "mdi:transmission-tower-export",
+                "enabled": True
             },
             {
-                "name": "Battery Charge Today",
-                "key": "energy_battery_charge_day",
+                "name": "Grid Energy Imported",
+                "key": "energy_grid_accumulated",
                 "unit": "kWh",
                 "device_class": "energy",
-                "state_class": "total_increasing"
-            },
-            {
-                "name": "Battery Discharge Today",
-                "key": "energy_battery_discharge_day",
-                "unit": "kWh",
-                "device_class": "energy",
-                "state_class": "total_increasing"
-            },
-            {
-                "name": "Battery Total Charge",
-                "key": "energy_battery_charge_total",
-                "unit": "kWh",
-                "device_class": "energy",
-                "state_class": "total_increasing"
-            },
-            {
-                "name": "Battery Total Discharge",
-                "key": "energy_battery_discharge_total",
-                "unit": "kWh",
-                "device_class": "energy",
-                "state_class": "total_increasing"
+                "state_class": "total_increasing",
+                "icon": "mdi:transmission-tower-import",
+                "enabled": True
             },
 
-            # Battery
+            # === BATTERY (Main - Always Enabled) ===
             {
                 "name": "Battery SOC",
-                "key": "soc_battery",
+                "key": "battery_soc",
                 "unit": "%",
                 "device_class": "battery",
                 "state_class": "measurement",
-                "icon": "mdi:battery"
+                "icon": "mdi:battery",
+                "enabled": True
+            },
+            {
+                "name": "Battery Charge Today",
+                "key": "battery_charge_day",
+                "unit": "kWh",
+                "device_class": "energy",
+                "state_class": "total_increasing",
+                "icon": "mdi:battery-plus",
+                "enabled": True
+            },
+            {
+                "name": "Battery Discharge Today",
+                "key": "battery_discharge_day",
+                "unit": "kWh",
+                "device_class": "energy",
+                "state_class": "total_increasing",
+                "icon": "mdi:battery-minus",
+                "enabled": True
             },
 
-            # Voltage
+            # === PV STRINGS (Main) ===
             {
-                "name": "Grid Voltage Phase A",
-                "key": "voltage_grid_A",
-                "unit": "V",
-                "device_class": "voltage",
-                "state_class": "measurement"
+                "name": "PV1 Power",
+                "key": "power_PV1",
+                "unit": "W",
+                "device_class": "power",
+                "state_class": "measurement",
+                "icon": "mdi:solar-panel",
+                "enabled": True
             },
             {
-                "name": "Grid Voltage Phase B",
-                "key": "voltage_grid_B",
-                "unit": "V",
-                "device_class": "voltage",
-                "state_class": "measurement"
-            },
-            {
-                "name": "Grid Voltage Phase C",
-                "key": "voltage_grid_C",
-                "unit": "V",
-                "device_class": "voltage",
-                "state_class": "measurement"
+                "name": "PV2 Power",
+                "key": "power_PV2",
+                "unit": "W",
+                "device_class": "power",
+                "state_class": "measurement",
+                "icon": "mdi:solar-panel",
+                "enabled": True
             },
             {
                 "name": "PV1 Voltage",
                 "key": "voltage_PV1",
                 "unit": "V",
                 "device_class": "voltage",
-                "state_class": "measurement"
+                "state_class": "measurement",
+                "enabled": True,
+                "entity_category": "diagnostic"
             },
             {
                 "name": "PV2 Voltage",
                 "key": "voltage_PV2",
                 "unit": "V",
                 "device_class": "voltage",
-                "state_class": "measurement"
+                "state_class": "measurement",
+                "enabled": True,
+                "entity_category": "diagnostic"
             },
-
-            # Current
             {
                 "name": "PV1 Current",
                 "key": "current_PV1",
                 "unit": "A",
                 "device_class": "current",
-                "state_class": "measurement"
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
             },
             {
                 "name": "PV2 Current",
                 "key": "current_PV2",
                 "unit": "A",
                 "device_class": "current",
-                "state_class": "measurement"
-            },
-            {
-                "name": "Grid Current Phase A",
-                "key": "current_active_grid_A",
-                "unit": "A",
-                "device_class": "current",
-                "state_class": "measurement"
-            },
-            {
-                "name": "Grid Current Phase B",
-                "key": "current_active_grid_B",
-                "unit": "A",
-                "device_class": "current",
-                "state_class": "measurement"
-            },
-            {
-                "name": "Grid Current Phase C",
-                "key": "current_active_grid_C",
-                "unit": "A",
-                "device_class": "current",
-                "state_class": "measurement"
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
             },
 
-            # Other
+            # === PV STRINGS 3-4 (Optional, Disabled by default) ===
+            {
+                "name": "PV3 Power",
+                "key": "power_PV3",
+                "unit": "W",
+                "device_class": "power",
+                "state_class": "measurement",
+                "icon": "mdi:solar-panel",
+                "enabled": False
+            },
+            {
+                "name": "PV4 Power",
+                "key": "power_PV4",
+                "unit": "W",
+                "device_class": "power",
+                "state_class": "measurement",
+                "icon": "mdi:solar-panel",
+                "enabled": False
+            },
+            {
+                "name": "PV3 Voltage",
+                "key": "voltage_PV3",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "PV4 Voltage",
+                "key": "voltage_PV4",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "PV3 Current",
+                "key": "current_PV3",
+                "unit": "A",
+                "device_class": "current",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "PV4 Current",
+                "key": "current_PV4",
+                "unit": "A",
+                "device_class": "current",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+
+            # === INVERTER STATUS ===
             {
                 "name": "Inverter Temperature",
-                "key": "temperature_internal",
+                "key": "inverter_temperature",
                 "unit": "°C",
                 "device_class": "temperature",
-                "state_class": "measurement"
+                "state_class": "measurement",
+                "enabled": True
+            },
+            {
+                "name": "Inverter Efficiency",
+                "key": "inverter_efficiency",
+                "unit": "%",
+                "state_class": "measurement",
+                "icon": "mdi:gauge",
+                "enabled": True,
+                "entity_category": "diagnostic"
+            },
+
+            # === GRID (3-Phase - Main) ===
+            {
+                "name": "Grid Voltage Phase A",
+                "key": "voltage_grid_A",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": True
+            },
+            {
+                "name": "Grid Voltage Phase B",
+                "key": "voltage_grid_B",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": True
+            },
+            {
+                "name": "Grid Voltage Phase C",
+                "key": "voltage_grid_C",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": True
             },
             {
                 "name": "Grid Frequency",
                 "key": "frequency_grid",
                 "unit": "Hz",
                 "device_class": "frequency",
-                "state_class": "measurement"
-            },
-            {
-                "name": "Active Grid Frequency",
-                "key": "freq_active_grid",
-                "unit": "Hz",
-                "device_class": "frequency",
-                "state_class": "measurement"
-            },
-            {
-                "name": "Efficiency",
-                "key": "efficiency",
-                "unit": "%",
                 "state_class": "measurement",
-                "icon": "mdi:gauge"
+                "enabled": True,
+                "entity_category": "diagnostic"
             },
+
+            # === GRID (3-Phase - Advanced, Disabled) ===
+            {
+                "name": "Grid Current Phase A",
+                "key": "current_grid_A",
+                "unit": "A",
+                "device_class": "current",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Grid Current Phase B",
+                "key": "current_grid_B",
+                "unit": "A",
+                "device_class": "current",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Grid Current Phase C",
+                "key": "current_grid_C",
+                "unit": "A",
+                "device_class": "current",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Grid Power Phase A",
+                "key": "power_grid_A",
+                "unit": "W",
+                "device_class": "power",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Grid Power Phase B",
+                "key": "power_grid_B",
+                "unit": "W",
+                "device_class": "power",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Grid Power Phase C",
+                "key": "power_grid_C",
+                "unit": "W",
+                "device_class": "power",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Line Voltage A-B",
+                "key": "voltage_line_AB",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Line Voltage B-C",
+                "key": "voltage_line_BC",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Line Voltage C-A",
+                "key": "voltage_line_CA",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+
+            # === POWER METER (Advanced) ===
+            {
+                "name": "Meter Voltage Phase A",
+                "key": "meter_voltage_A",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Meter Voltage Phase B",
+                "key": "meter_voltage_B",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Meter Voltage Phase C",
+                "key": "meter_voltage_C",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Meter Current Phase A",
+                "key": "meter_current_A",
+                "unit": "A",
+                "device_class": "current",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Meter Current Phase B",
+                "key": "meter_current_B",
+                "unit": "A",
+                "device_class": "current",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Meter Current Phase C",
+                "key": "meter_current_C",
+                "unit": "A",
+                "device_class": "current",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+
+            # === BATTERY (Advanced) ===
+            {
+                "name": "Battery Total Charge",
+                "key": "battery_charge_total",
+                "unit": "kWh",
+                "device_class": "energy",
+                "state_class": "total_increasing",
+                "enabled": True,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Battery Total Discharge",
+                "key": "battery_discharge_total",
+                "unit": "kWh",
+                "device_class": "energy",
+                "state_class": "total_increasing",
+                "enabled": True,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Battery Bus Voltage",
+                "key": "battery_bus_voltage",
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Battery Bus Current",
+                "key": "battery_bus_current",
+                "unit": "A",
+                "device_class": "current",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+
+            # === POWER FACTOR & REACTIVE POWER (Expert) ===
             {
                 "name": "Power Factor",
-                "key": "power_factor_meter",
+                "key": "power_factor",
                 "state_class": "measurement",
-                "icon": "mdi:sine-wave"
+                "icon": "mdi:sine-wave",
+                "enabled": False,
+                "entity_category": "diagnostic"
             },
+            {
+                "name": "Reactive Power",
+                "key": "power_reactive",
+                "unit": "var",
+                "device_class": "reactive_power",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Meter Reactive Power",
+                "key": "meter_power_reactive",
+                "unit": "var",
+                "device_class": "reactive_power",
+                "state_class": "measurement",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Grid Reactive Energy",
+                "key": "energy_grid_accumulated_reactive",
+                "unit": "kvarh",
+                "state_class": "total_increasing",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+
+            # === OTHER METRICS ===
             {
                 "name": "Day Peak Power",
                 "key": "power_active_peak_day",
                 "unit": "W",
                 "device_class": "power",
-                "state_class": "measurement"
+                "state_class": "measurement",
+                "enabled": True,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Insulation Resistance",
+                "key": "inverter_insulation_resistance",
+                "unit": "MΩ",
+                "state_class": "measurement",
+                "icon": "mdi:resistor",
+                "enabled": False,
+                "entity_category": "diagnostic"
             },
         ]
 
+        # Publish sensor configs
         for sensor in sensors:
             config_topic = f"homeassistant/sensor/huawei_solar/{sensor['key']}/config"
 
@@ -301,9 +574,86 @@ def publish_discovery_configs(base_topic):
                 config["state_class"] = sensor["state_class"]
             if "icon" in sensor:
                 config["icon"] = sensor["icon"]
+            if "entity_category" in sensor:
+                config["entity_category"] = sensor["entity_category"]
+            if "enabled" in sensor and not sensor["enabled"]:
+                config["enabled_by_default"] = False
 
             client.publish(config_topic, json.dumps(config), retain=True)
             logger().debug(f"Published discovery config for {sensor['name']}")
+
+        # === TEXT SENSORS (Status) ===
+        text_sensors = [
+            {
+                "name": "Inverter Status",
+                "key": "inverter_status",
+                "icon": "mdi:information",
+                "enabled": True
+            },
+            {
+                "name": "Battery Status",
+                "key": "battery_status",
+                "icon": "mdi:battery-heart",
+                "enabled": True
+            },
+            {
+                "name": "Meter Status",
+                "key": "meter_status",
+                "icon": "mdi:meter-electric",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Inverter State 1",
+                "key": "inverter_state_1",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Inverter State 2",
+                "key": "inverter_state_2",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Inverter State 3",
+                "key": "inverter_state_3",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+            {
+                "name": "Inverter Startup Time",
+                "key": "inverter_startup_time",
+                "device_class": "timestamp",
+                "enabled": False,
+                "entity_category": "diagnostic"
+            },
+        ]
+
+        for sensor in text_sensors:
+            config_topic = f"homeassistant/sensor/huawei_solar/{sensor['key']}/config"
+
+            config = {
+                "name": sensor["name"],
+                "unique_id": f"huawei_solar_{sensor['key']}",
+                "state_topic": base_topic,
+                "value_template": f"{{{{ value_json.{sensor['key']} }}}}",
+                "availability_topic": f"{base_topic}/status",
+                "payload_available": "online",
+                "payload_not_available": "offline",
+                "device": device_config
+            }
+
+            if "icon" in sensor:
+                config["icon"] = sensor["icon"]
+            if "device_class" in sensor:
+                config["device_class"] = sensor["device_class"]
+            if "entity_category" in sensor:
+                config["entity_category"] = sensor["entity_category"]
+            if "enabled" in sensor and not sensor["enabled"]:
+                config["enabled_by_default"] = False
+
+            client.publish(config_topic, json.dumps(config), retain=True)
 
         # Binary sensor for connectivity
         status_config = {
@@ -322,7 +672,8 @@ def publish_discovery_configs(base_topic):
         )
 
         client.disconnect()
-        logger().info("Successfully published all MQTT Discovery configs")
+        logger().info(
+            f"Successfully published {len(sensors) + len(text_sensors) + 1} MQTT Discovery configs")
 
     except Exception as e:
         logger().error(f"Error publishing discovery configs: {e}")
