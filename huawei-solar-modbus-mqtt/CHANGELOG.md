@@ -1,15 +1,13 @@
 # Changelog
 
-## [Unreleased]
-### Added
-- [ ] Neue Features hier dokumentieren
-
+## [1.0.1] - 2025-12-05
 ### Fixed
-- [ ] Bugfixes hier dokumentieren
+- DecodeError handling für unbekannte Register-Werte
+- Verbesserte Fehlerbehandlung bei Modbus-Kommunikation
 
 ### Changed
-- [ ] Änderungen hier dokumentieren
-
+- Aktualisierte huawei-solar Library auf neueste Version
+- Erweiterte Logging-Ausgaben für besseres Debugging
 ## [1.0.0] - 2025-12-04
 ### Added
 - Erste stabile Version des Add-ons
