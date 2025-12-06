@@ -126,6 +126,7 @@ async def main():
             modbus_host,
             modbus_port,
             slave_id,
+            asyncio.Lock(),  # <-- Hinzugefügt
         )
         logging.info("HuaweiSolarBridge created successfully")
     except Exception as e:
