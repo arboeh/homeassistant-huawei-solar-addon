@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 import time
-import traceback
 
 from huawei_solar import AsyncHuaweiSolar
 from huawei_solar.exceptions import DecodeError, ReadException
@@ -55,22 +54,24 @@ async def main_once(client):
 
     logging.debug("Reading inverter data")
 
-    # Hier müssen wir die Register einzeln oder in Gruppen lesen
-    # Da bridge.update() nicht mehr verfügbar ist
     try:
         from huawei_solar.registers import REGISTERS
         
         data = {}
-        for register in REGISTERS:
+        for register_name in REGISTERS:
             try:
-                value = await client.get(register.register)
-                data[register.name] = value
+                value = await client.get(register_name)
+                data[register_name] = value
+                logging.debug("Read %s: %s", register_name, value)
             except Exception as e:
-                logging.debug("Failed to read register %s: %s", register.name, e)
+                logging.debug("Failed to read register %s: %s", register_name, e)
                 continue
                 
     except DecodeError as e:
         logging.warning("DecodeError during data read: %s", e)
+        raise
+    except Exception as e:
+        logging.error("Failed to read registers: %s", e)
         raise
 
     logging.debug("Read %d register values", len(data))
@@ -110,7 +111,7 @@ async def main():
     wait = int(os.environ.get("HUAWEI_POLL_INTERVAL", "60"))
 
     try:
-        client = await AsyncHuaweiSolar.create(modbus_host, modbus_port, slave_id)  # <-- Geändert
+        client = await AsyncHuaweiSolar.create(modbus_host, modbus_port, slave_id)
         logging.info("AsyncHuaweiSolar client created successfully")
     except Exception as e:
         logging.error("Failed to create AsyncHuaweiSolar: %s", e)
