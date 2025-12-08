@@ -16,6 +16,30 @@ from modbus_energy_meter.mqtt import (
 )
 from modbus_energy_meter.transform import transform_result
 
+ESSENTIAL_REGISTERS = [
+    "active_power",              # → power_active
+    "input_power",               # → power_input  
+    "active_grid_power_peak",    # → meter_power_active (HV-Meter)
+    "storage_charge_discharge_power",  # → battery_power
+    "storage_state_of_capacity", # → battery_soc
+    "daily_yield_energy",        # → energy_yield_day
+    "accumulated_yield_energy",  # → energy_yield_accumulated
+    "grid_exported_energy",      # → energy_grid_exported
+    "grid_accumulated_energy",   # → energy_grid_accumulated
+    "storage_day_charge",        # → battery_charge_day
+    "storage_day_discharge",     # → battery_discharge_day
+    "pv_01_power",               # → power_PV1
+    "pv_01_voltage",             # → voltage_PV1
+    "pv_01_current",             # → current_PV1
+    "internal_temperature",      # → inverter_temperature
+    "efficiency",                # → inverter_efficiency
+    "grid_A_voltage",            # → voltage_grid_A
+    "grid_B_voltage",            # → voltage_grid_B
+    "grid_C_voltage",            # → voltage_grid_C
+    "grid_frequency",            # → frequency_grid
+    "day_active_power_peak",     # → power_active_peak_day
+]
+
 # Logger für dieses Modul
 logger = logging.getLogger("huawei.main")
 
@@ -24,25 +48,18 @@ LAST_SUCCESS = 0  # Unix-Timestamp des letzten erfolgreichen Reads
 
 def init():
     load_dotenv()
-
-    # Log-Level aus Umgebungsvariable lesen
+    # ... (REST DER init() FUNKTION UNVERÄNDERT) ...
     log_level_str = os.environ.get("HUAWEI_LOG_LEVEL", "INFO").upper()
-
-    # String in Logging-Konstante umwandeln
     log_level_map = {
         "DEBUG": logging.DEBUG,
         "INFO": logging.INFO,
         "WARNING": logging.WARNING,
         "ERROR": logging.ERROR
     }
-
     loglevel = log_level_map.get(log_level_str, logging.INFO)
-
-    # Debug-Flag für Abwärtskompatibilität beibehalten
     if os.environ.get("HUAWEI_MODBUS_DEBUG") == "yes":
         loglevel = logging.DEBUG
 
-    # Root Logger konfigurieren
     root_logger = logging.getLogger()
     root_logger.setLevel(loglevel)
     handler = logging.StreamHandler(sys.stdout)
@@ -50,114 +67,58 @@ def init():
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     ))
     root_logger.addHandler(handler)
-
-    # Alte Handler entfernen (vermeidet Duplikate)
     for h in root_logger.handlers[:]:
         root_logger.removeHandler(h)
     root_logger.addHandler(handler)
 
-    # Pymodbus-Logging konfigurieren
     pymodbus_logger = logging.getLogger("pymodbus")
     if loglevel == logging.DEBUG:
-        # Bei DEBUG: Zeige alle pymodbus-Logs
         pymodbus_logger.setLevel(logging.DEBUG)
         logger.debug("Pymodbus debug logging enabled")
     else:
-        # Sonst: Nur Warnungen und Fehler
         pymodbus_logger.setLevel(logging.WARNING)
 
-    # Huawei-Solar Library (nutzt auch logging)
     huawei_solar_logger = logging.getLogger("huawei_solar")
     huawei_solar_logger.setLevel(loglevel)
 
-    # Initialisierungs-Log
-    logger.info(
-        f"Logging initialized with level: {logging.getLevelName(loglevel)}")
-    logger.debug(
-        f"Environment: HUAWEI_LOG_LEVEL={log_level_str}, "
-        f"HUAWEI_MODBUS_DEBUG={os.environ.get('HUAWEI_MODBUS_DEBUG', 'no')}"
-    )
-    logger.debug(
-        f"Pymodbus log level: {logging.getLevelName(pymodbus_logger.level)}")
-
+    logger.info(f"Logging initialized with level: {logging.getLevelName(loglevel)}")
+    logger.debug(f"Environment: HUAWEI_LOG_LEVEL={log_level_str}, HUAWEI_MODBUS_DEBUG={os.environ.get('HUAWEI_MODBUS_DEBUG', 'no')}")
+    logger.debug(f"Pymodbus log level: {logging.getLevelName(pymodbus_logger.level)}")
 
 def heartbeat(topic: str):
-    """
-    Überwacht, ob seit zu langer Zeit kein erfolgreicher Read war,
-    und setzt dann den Status auf offline.
-    """
     global LAST_SUCCESS
-
     timeout = int(os.environ.get("HUAWEI_STATUS_TIMEOUT", "180"))
-
     if LAST_SUCCESS == 0:
         logger.debug("Heartbeat: No successful read yet, skipping check")
         return
-
     diff = time.time() - LAST_SUCCESS
-
     if diff > timeout:
         publish_status("offline", topic)
-        logger.warning(
-            f"No successful data for {timeout}s (actual: {diff:.1f}s) -> status=offline"
-        )
+        logger.warning(f"No successful data for {timeout}s (actual: {diff:.1f}s) -> status=offline")
     else:
-        logger.debug(
-            f"Heartbeat: Last successful read {diff:.1f}s ago (timeout: {timeout}s)"
-        )
+        logger.debug(f"Heartbeat: Last successful read {diff:.1f}s ago (timeout: {timeout}s)")
 
 
-async def read_registers_batched(client: AsyncHuaweiSolar, batch_size: int = 20):
-    """
-    Lese alle Register parallel in Batches für bessere Performance und Stabilität.
-
-    Args:
-        client: AsyncHuaweiSolar client
-        batch_size: Register pro Batch (20 empfohlen)
-
-    Returns:
-        dict: {register_name: value} für erfolgreiche Reads
-    """
-    from huawei_solar.registers import REGISTERS
-
-    register_list = list(REGISTERS.keys())
+async def read_registers_filtered(client: AsyncHuaweiSolar):
+    """Lese nur ESSENTIAL_REGISTERS sequentiell für maximale Performance"""
     all_data = {}
-    total_batches = (len(register_list) + batch_size - 1) // batch_size
-
-    logger.debug(
-        "Starting batched read: %d registers in %d batches of %d",
-        len(register_list), total_batches, batch_size
-    )
-
-    for i in range(0, len(register_list), batch_size):
-        batch = register_list[i:i + batch_size]
-        batch_num = (i // batch_size) + 1
-
-        batch_start = time.time()
-
-        # Parallel requests für diesen Batch
-        tasks = [client.get(name) for name in batch]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Ergebnisse verarbeiten
-        successful = 0
-        for name, result in zip(batch, results):
-            if isinstance(result, Exception):
-                logger.debug("Failed %s: %s", name, type(result).__name__)
-            else:
-                all_data[name] = result
-                successful += 1
-
-        batch_duration = time.time() - batch_start
-        logger.debug(
-            "Batch %d/%d: %d/%d successful in %.2fs",
-            batch_num, total_batches, successful, len(batch), batch_duration
-        )
-
-        # Kurze Pause zwischen Batches
-        if batch_num < total_batches:
-            await asyncio.sleep(0.1)
-
+    logger.debug(f"Reading {len(ESSENTIAL_REGISTERS)} essential registers")
+    
+    read_start = time.time()
+    successful = 0
+    
+    for name in ESSENTIAL_REGISTERS:
+        try:
+            result = await client.get(name)
+            all_data[name] = result
+            successful += 1
+        except Exception as e:
+            logger.debug("Failed %s: %s", name, type(e).__name__)
+    
+    duration = time.time() - read_start
+    logger.info("Essential registers read in %.1fs (%d/%d successful)", 
+                duration, successful, len(ESSENTIAL_REGISTERS))
+    
     return all_data
 
 
@@ -178,24 +139,18 @@ async def main_once(client: AsyncHuaweiSolar):
     logger.debug("Starting data acquisition cycle")
 
     try:
-        # Parallele batched Modbus-Reads
         modbus_start = time.time()
-        data = await read_registers_batched(client, batch_size=20)
+        data = await read_registers_filtered(client)
         modbus_duration = time.time() - modbus_start
 
-        from huawei_solar.registers import REGISTERS
         successful_reads = len(data)
-        failed_reads = len(REGISTERS) - successful_reads
-
         logger.info(
-            "Parallel Modbus read completed in %.1fs (%d successful, %d failed)",
-            modbus_duration, successful_reads, failed_reads
+            "Essential Modbus read completed in %.1fs (%d/%d successful)", 
+            modbus_duration, successful_reads, len(ESSENTIAL_REGISTERS)
         )
 
     except DecodeError as e:
-        logger.warning(
-            f"DecodeError during data read after {time.time() - cycle_start:.3f}s: {e}"
-        )
+        logger.warning(f"DecodeError during data read after {time.time() - cycle_start:.3f}s: {e}")
         raise
     except Exception as e:
         logger.error(f"Failed to read registers: {e}")
@@ -206,27 +161,20 @@ async def main_once(client: AsyncHuaweiSolar):
         logger.warning("No data received from inverter")
         return
 
-    # Transformation mit Zeitmessung
     transform_start = time.time()
     mqtt_data = transform_result(data)
     transform_duration = time.time() - transform_start
-
     logger.debug(f"Data transformation completed in {transform_duration:.3f}s")
 
-    # MQTT Publish mit Zeitmessung
     mqtt_start = time.time()
     mqtt_publish_data(mqtt_data, topic)
     publish_status("online", topic)
     mqtt_duration = time.time() - mqtt_start
-
     logger.debug(f"MQTT publish completed in {mqtt_duration:.3f}s")
 
     LAST_SUCCESS = time.time()
-
-    # Gesamt-Zyklus-Zeit
     cycle_duration = time.time() - cycle_start
 
-    # Strukturierte Info-Meldung
     logger.info(
         "Data published - Solar: %dW | Grid: %dW | Battery: %dW (%.1f%%)",
         mqtt_data.get('power_active', 0),
@@ -240,7 +188,6 @@ async def main_once(client: AsyncHuaweiSolar):
         cycle_duration, modbus_duration, transform_duration, mqtt_duration
     )
 
-    # Performance-Warnung
     poll_interval = int(os.environ.get("HUAWEI_POLL_INTERVAL", "60"))
     if cycle_duration > poll_interval * 0.8:
         logger.warning(
