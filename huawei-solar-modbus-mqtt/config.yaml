@@ -1,5 +1,5 @@
 name: Huawei Solar Modbus to MQTT
-version: '1.0.5'
+version: '1.0.6'
 slug: huawei_solar_modbus_mqtt
 description: Huawei Solar Inverter via Modbus to MQTT with auto-discovery
 url: https://github.com/arboeh/homeassistant-huawei-solar-addon
@@ -21,7 +21,7 @@ options:
   modbus_port: 502
   modbus_device_id: 1
   mqtt_topic: 'huawei-solar'
-  log_level: 'INFO'
+  log_level: INFO
   status_timeout: 180
   poll_interval: 60
 schema:

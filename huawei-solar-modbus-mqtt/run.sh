@@ -1,57 +1,43 @@
-#!/usr/bin/with-contenv bashio
+#!/usr/bin/env bashio
+set -e
 
 bashio::log.info "Starting Huawei Solar Modbus to MQTT Add On..."
 
 # Read config from Home Assistant
-export HUAWEI_MODBUS_HOST=$(bashio::config 'modbus_host')
-export HUAWEI_MODBUS_PORT=$(bashio::config 'modbus_port')
-export HUAWEI_MODBUS_DEVICE_ID=$(bashio::config 'modbus_device_id')
-export HUAWEI_MODBUS_MQTT_TOPIC=$(bashio::config 'mqtt_topic')
-export HUAWEI_STATUS_TIMEOUT=$(bashio::config 'status_timeout')
-export HUAWEI_POLL_INTERVAL=$(bashio::config 'poll_interval')
-export HUAWEI_LOG_LEVEL=$(bashio::config 'log_level')
+export HUAWEI_MODBUS_HOST=$(bashio::config modbus_host)
+export HUAWEI_MODBUS_PORT=$(bashio::config modbus_port)
+export HUAWEI_MODBUS_DEVICE_ID=$(bashio::config modbus_device_id)
+export HUAWEI_MODBUS_MQTT_TOPIC=$(bashio::config mqtt_topic)
+export HUAWEI_STATUS_TIMEOUT=$(bashio::config status_timeout)
+export HUAWEI_POLL_INTERVAL=$(bashio::config poll_interval)
 
-bashio::log.info "Log level set to: ${HUAWEI_LOG_LEVEL}"
+# ✅ LOG LEVEL - UPPERCASE für Python logging
+export HUAWEI_LOG_LEVEL=$(bashio::config log_level | tr '[:lower:]' '[:upper:]')
 
-# MQTT Config from Home Assistant Supervisor
-if bashio::config.has_value 'mqtt_host'; then
-    export HUAWEI_MODBUS_MQTT_BROKER=$(bashio::config 'mqtt_host')
+# Legacy debug flag
+if bashio::config.true debug; then
+    export HUAWEI_MODBUS_DEBUG="yes"
+    export HUAWEI_LOG_LEVEL="DEBUG"
+fi
+
+# MQTT Config
+if bashio::config.has_value mqtt_host; then
+    export HUAWEI_MODBUS_MQTT_BROKER=$(bashio::config mqtt_host)
     bashio::log.info "Using custom MQTT broker: ${HUAWEI_MODBUS_MQTT_BROKER}"
 else
-    export HUAWEI_MODBUS_MQTT_BROKER=$(bashio::services mqtt "host")
-    bashio::log.info "Using Home Assistant MQTT broker: ${HUAWEI_MODBUS_MQTT_BROKER}"
+    export HUAWEI_MODBUS_MQTT_BROKER=$(bashio::services mqtt host)
+    bashio::log.info "Using HA MQTT broker: ${HUAWEI_MODBUS_MQTT_BROKER}"
 fi
 
-if bashio::config.has_value 'mqtt_port'; then
-    export HUAWEI_MODBUS_MQTT_PORT=$(bashio::config 'mqtt_port')
-else
-    export HUAWEI_MODBUS_MQTT_PORT=$(bashio::services mqtt "port")
-fi
+export HUAWEI_MODBUS_MQTT_PORT=$(bashio::config mqtt_port || bashio::services mqtt port)
+export HUAWEI_MODBUS_MQTT_USER=$(bashio::config mqtt_user || bashio::services mqtt username)
+export HUAWEI_MODBUS_MQTT_PASSWORD=$(bashio::config mqtt_password || bashio::services mqtt password)
 
-if bashio::config.has_value 'mqtt_user'; then
-    export HUAWEI_MODBUS_MQTT_USER=$(bashio::config 'mqtt_user')
-else
-    export HUAWEI_MODBUS_MQTT_USER=$(bashio::services mqtt "username")
-fi
+# Final bashio logs
+bashio::log.info "Log level: ${HUAWEI_LOG_LEVEL}"
+bashio::log.info "Inverter: ${HUAWEI_MODBUS_HOST}:${HUAWEI_MODBUS_PORT} (ID: ${HUAWEI_MODBUS_DEVICE_ID})"
+bashio::log.info "MQTT: ${HUAWEI_MODBUS_MQTT_TOPIC}"
+bashio::log.info "Starting Python..."
 
-if bashio::config.has_value 'mqtt_password'; then
-    export HUAWEI_MODBUS_MQTT_PASSWORD=$(bashio::config 'mqtt_password')
-else
-    export HUAWEI_MODBUS_MQTT_PASSWORD=$(bashio::services mqtt "password")
-fi
-
-# Debug Mode
-if bashio::config.true 'debug'; then
-    export HUAWEI_MODBUS_DEBUG="yes"
-    bashio::log.level "debug"
-    bashio::log.debug "Debug mode enabled"
-else
-    export HUAWEI_MODBUS_DEBUG="no"
-fi
-
-bashio::log.info "Connecting to inverter at ${HUAWEI_MODBUS_HOST}:${HUAWEI_MODBUS_PORT}"
-bashio::log.info "Modbus Slave ID: ${HUAWEI_MODBUS_DEVICE_ID}"
-bashio::log.info "MQTT Topic: ${HUAWEI_MODBUS_MQTT_TOPIC}"
-
-# Start application
-python3 -u /app/huawei2mqtt.py
+# 🚀 Start Python - Logs werden jetzt sichtbar!
+exec python3 -u /app/huawei2mqtt.py 2>&1

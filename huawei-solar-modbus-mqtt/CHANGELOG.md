@@ -14,11 +14,37 @@
 
 - [ ] Änderungen hier dokumentieren
 
+## [1.0.6] - 2025-12-08
+
+### Added
+
+- Verbesserte Dashboards und Überwachung für MQTT-Verbindung im Add-on
+- Erweiterte Fehlerbehandlung bei fehlenden oder falschen MQTT Broker-Daten
+- Zusätzliche Umgebungsvariablen-Validierung beim Start des Add-ons
+- Detailiertes Debug-Logging der ENV-Variablen-Konfiguration im Startskript
+
+### Changed
+
+- `run.sh` verbessert für zuverlässigen Start mit:
+  - Korrekte Handhabung von `bashio::config` Ausgabe (Groß-/Kleinschreibung bei `log_level`)
+  - Sicheres Setzen und Export von Umgebungsvariablen
+  - Vollständige Weiterleitung aller Logs von Python an Supervisor (exec + python3 -u + 2>&1)
+- Fehlerfreie Integration von Legacy `debug` Flag mit `log_level` Überschreibung
+- Verbesserte Konsistenz in der Log-Ausgabe beim Add-on Start
+
+### Fixed
+
+- Fix für fehlende oder falsch gesetzte `HUAWEI_LOG_LEVEL` Umgebungsvariable im `run.sh`
+- Behebung von Logs, die nur bashio-Ausgaben zeigten, ohne Python-Log-Details
+- Verhindert Abbruch des Python-Skripts ohne sichtbare Fehlermeldung beim Add-on Start
+- Korrekte Anwendung des neuen API-Namens `AsyncHuaweiSolar` in allen Dateien sichergestellt
+
 ## [1.0.5] - 2025-12-08
 
 ### Added
 
 - Separate Log-Level-Kontrolle für pymodbus Library (reduziert Logging-Overhead)
+- MQTT Retain-Flag für publish_data() zur besseren EVCC-Integration
 - Null-Werte-Behandlung in transform.py für kritische Datenpunkte
 - Fallback auf 0 für fehlende oder null-Werte bei power_active, power_input, meter_power_active, battery_power, battery_soc
 - Pymodbus-Logger wird bei INFO/WARNING/ERROR automatisch auf WARNING-Level gesetzt
@@ -27,6 +53,7 @@
 
 ### Changed
 
+- MQTT-Daten werden jetzt mit `retain=True` publiziert für bessere EVCC-Kompatibilität
 - Pymodbus-Logs erscheinen nur noch bei DEBUG-Level oder als WARNING/ERROR
 - Kritische Sensor-Werte (Power, SOC) werden nicht mehr als null publiziert, sondern standardmäßig als 0
 - Verbesserte Fehlerbehandlung für fehlende Register-Werte in transform.py
