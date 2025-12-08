@@ -14,6 +14,35 @@
 
 - [ ] Änderungen hier dokumentieren
 
+## [1.0.4] - 2025-12-08
+
+### Added
+
+- Konfigurierbarer Log-Level über `log_level` Option (DEBUG, INFO, WARNING, ERROR)
+- Strukturiertes Logging mit separaten Loggern für Module (huawei.main, huawei.mqtt, huawei.transform)
+- Performance-Messung für Modbus-Reads, Daten-Transformation und MQTT-Publishing
+- Detaillierte Debug-Logs mit Zeitmessungen für jeden Zyklus
+- Zyklus-Zähler für bessere Nachverfolgbarkeit bei Fehlersuche
+- Register-Read-Statistiken (erfolgreiche/fehlgeschlagene Reads) im DEBUG-Modus
+- Performance-Warnungen bei langsamen Zyklen (>80% des poll_interval)
+- Heartbeat-Logging für Status-Überwachung
+- Strukturierte Info-Logs zeigen aktuelle Datenpunkte (Solar/Grid/Battery Power, SOC)
+
+### Changed
+
+- Verbessertes Logging-Format mit Modul-Namen: `%(asctime)s - %(name)s - %(levelname)s - %(message)s`
+- Alle `logging.xxx()` Aufrufe auf modulare `logger.xxx()` umgestellt
+- `get_value()` Funktion in transform.py vereinfacht und optimiert
+- Enum- und Datetime-Werte werden automatisch korrekt konvertiert
+- Traceback-Logging bei Fehlern verbessert (nur bei DEBUG-Level)
+- Bessere Lesbarkeit durch strukturierte und kontextbezogene Log-Ausgaben
+- Debug-Logs enthalten jetzt Performance-Metriken für jeden Verarbeitungsschritt
+- Legacy `debug: true` Option bleibt für Abwärtskompatibilität erhalten
+
+### Removed
+
+- Unnötige Hilfsfunktionen in transform.py entfernt (`calculate_power`, `get_enum_value`, `get_list_value`, `get_datetime_value`)
+
 ## [1.0.3] - 2025-12-07
 
 ### Fixed
@@ -32,58 +61,4 @@
 ### Fixed
 
 - HuaweiSolarBridge.create() Parameter-Fehler behoben (explizite Keyword-Argumente)
-- DecodeError-Handling für unbekannte Register-Werte (z.B. Unit-Code 780) verbessert
-- Robustere Fehlerbehandlung bei Modbus-Kommunikationsproblemen
-- Verhindert Absturz des Add-ons bei einzelnen fehlerhaften Registern
-- `heartbeat`-Funktion korrekt platziert (behebt "name 'heartbeat' is not defined" Fehler)
-
-### Changed
-
-- Aktualisierte `huawei-solar` Library auf Version >=2.3.0
-- Aktualisierte `pymodbus` auf Version >=3.8.6 zur Verbesserung der Protokoll-Kompatibilität
-- Erweiterte Logging-Ausgaben für besseres Debugging
-- Separate Exception-Behandlung für `DecodeError` und `ReadException`
-
-## [1.0.1] - 2025-12-05
-
-### Fixed
-
-- DecodeError handling für unbekannte Register-Werte
-- Verbesserte Fehlerbehandlung bei Modbus-Kommunikation
-
-### Changed
-
-- Aktualisierte huawei-solar Library auf neueste Version
-- Erweiterte Logging-Ausgaben für besseres Debugging
-
-## [1.0.0] - 2025-12-04
-
-### Added
-
-- Erste stabile Version des Add-ons
-- Versionierung und Release-Workflow mit GitHub Actions
-- Badge für aktuelle Release-Version in der README
-
-### Changed
-
-- Wechsel von 0.9.0-beta auf 1.0.0 ohne Breaking Changes
-
-## [0.9.0-beta] - 2025-12-03
-
-### Added
-
-- Initial beta release
-- Modbus TCP Verbindung zu Huawei Solar Inverter
-- Automatische MQTT Discovery für Home Assistant
-- Batterie-Monitoring (SOC, Lade-/Entladeleistung)
-- PV-String-Monitoring (PV1/PV2, optional PV3/PV4)
-- Netz-Monitoring (Import/Export, 3-phasig)
-- Energie-Statistiken (Tages-/Gesamtenergie)
-- Temperatur- und Wirkungsgrad-Monitoring
-- Automatisches Reconnect bei Fehlern
-- Konfigurierbar über Home Assistant UI
-
-### Known Issues
-
-- Icon benötigt noch Verfeinerung
-- Erweiterte Tests laufen noch
+- DecodeError-
