@@ -1,6 +1,6 @@
 # Huawei Solar Modbus → Home Assistant via MQTT
 
-🌐 **English** | 🇩🇪 [Deutsch](README.de.md)
+🌐 **English** | 🇩🇪 [Deutsch](README_de.md)
 
 [![aarch64](https://img.shields.io/badge/aarch64-yes-green.svg)](https://github.com/arboeh/homeassistant-huawei-solar-addon)
 [![amd64](https://img.shields.io/badge/amd64-yes-green.svg)](https://github.com/arboeh/homeassistant-huawei-solar-addon)
