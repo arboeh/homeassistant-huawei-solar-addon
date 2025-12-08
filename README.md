@@ -13,6 +13,7 @@
 Home Assistant Add-on: Huawei SUN2000 Inverter via Modbus TCP → MQTT with Auto-Discovery.
 
 ## Features
+
 - Direct Modbus TCP connection to Huawei Inverter
 - Automatic Home Assistant MQTT Discovery
 - Battery monitoring (SOC, charge/discharge power, daily energy)
@@ -23,8 +24,11 @@ Home Assistant Add-on: Huawei SUN2000 Inverter via Modbus TCP → MQTT with Auto
 - Online/offline status with heartbeat monitoring
 - Automatic reconnection on communication errors
 - Robust error handling for unknown register values
+- **Configurable logging** with multiple log levels
+- **Performance monitoring** with detailed timing metrics
 
 ## Installation
+
 1. [![Add Repository](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Farboeh%2Fhomeassistant-huawei-solar-addon)
 
 2. Install "Huawei Solar Modbus to MQTT" from Add-on Store
@@ -35,11 +39,13 @@ Home Assistant Add-on: Huawei SUN2000 Inverter via Modbus TCP → MQTT with Auto
 ## Configuration
 
 ### Modbus Settings
+
 - **modbus_host**: IP address of your Huawei inverter (e.g., `192.168.1.100`)
 - **modbus_port**: Modbus TCP port (default: `502`)
 - **modbus_device_id**: Modbus slave ID (default: `1`)
 
 ### MQTT Settings
+
 - **mqtt_host**: MQTT broker address (default: `core-mosquitto` for HA built-in broker)
 - **mqtt_port**: MQTT broker port (default: `1883`)
 - **mqtt_user**: MQTT username (leave empty if authentication is disabled)
@@ -47,7 +53,13 @@ Home Assistant Add-on: Huawei SUN2000 Inverter via Modbus TCP → MQTT with Auto
 - **mqtt_topic**: Base topic for MQTT messages (default: `huawei-solar`)
 
 ### Advanced Settings
-- **debug**: Enable debug logging (default: `false`)
+
+- **log_level**: Logging detail level (default: `INFO`)
+  - `DEBUG`: Very detailed with performance metrics, register reads, timing measurements
+  - `INFO`: Normal - shows important events and data points
+  - `WARNING`: Only warnings and errors
+  - `ERROR`: Only errors
+- **debug**: Legacy debug mode (overrides log_level to DEBUG, default: `false`)
 - **status_timeout**: Seconds after which the status is set to offline if no successful read (default: `180`)
 - **poll_interval**: Interval in seconds between data reads (default: `60`)
 
@@ -61,16 +73,19 @@ Home Assistant Add-on: Huawei SUN2000 Inverter via Modbus TCP → MQTT with Auto
     mqtt_user: ""
     mqtt_password: ""
     mqtt_topic: huawei-solar
+    log_level: INFO
     debug: false
     status_timeout: 180
     poll_interval: 60
 
 ## MQTT Topics
+
 - `<mqtt_topic>` - JSON data with all inverter values
 - `<mqtt_topic>/status` - Status (online/offline)
 - `homeassistant/sensor/<mqtt_topic>/*` - Auto-discovery topics
 
 ## Monitored Data
+
 - Battery state of charge (SOC)
 - Battery charge/discharge power
 - PV string voltages and currents (PV1-PV4)
@@ -81,14 +96,44 @@ Home Assistant Add-on: Huawei SUN2000 Inverter via Modbus TCP → MQTT with Auto
 - Inverter efficiency
 - Device status
 
+## Logging
+
+The add-on offers different log levels for various use cases:
+
+### INFO (Default)
+
+Clean logs for normal operation:
+
+    2025-12-08T08:37:00+0100 - huawei.main - INFO - Huawei Solar Modbus to MQTT starting
+    2025-12-08T08:37:01+0100 - huawei.main - INFO - AsyncHuaweiSolar created successfully
+    2025-12-08T08:37:02+0100 - huawei.main - INFO - Data published - Solar: 4500W | Grid: -200W | Battery: 800W (85%)
+
+### DEBUG
+
+Detailed logs with performance metrics for troubleshooting:
+
+    2025-12-08T08:37:02+0100 - huawei.main - DEBUG - Modbus read completed in 1.842s (87 successful, 5 failed)
+    2025-12-08T08:37:02+0100 - huawei.transform - DEBUG - Transformation complete: 73 values extracted in 0.003s
+    2025-12-08T08:37:02+0100 - huawei.mqtt - DEBUG - MQTT publish completed in 0.124s
+    2025-12-08T08:37:02+0100 - huawei.main - DEBUG - Cycle complete in 1.969s (Modbus: 1.842s, Transform: 0.003s, MQTT: 0.124s)
+
+### Performance Warnings
+
+Automatic warnings for slow cycles:
+
+    2025-12-08T08:37:02+0100 - huawei.main - WARNING - Cycle took 52.1s - close to poll_interval (60s). Consider increasing poll_interval.
+
 ## Troubleshooting
+
 - Ensure Modbus TCP is enabled on your Huawei inverter
 - Check network connectivity between Home Assistant and inverter
 - Verify MQTT broker is running and accessible
-- Enable debug mode for detailed logging
+- Set `log_level: DEBUG` for detailed logging when troubleshooting
 - Check the add-on logs for error messages
+- For performance issues: increase `poll_interval`
 
 ## Support
+
 - [Home Assistant Community](https://community.home-assistant.io)
 - [GitHub Issues](https://github.com/arboeh/homeassistant-huawei-solar-addon/issues)
 

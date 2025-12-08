@@ -15,9 +15,11 @@ Dieses Add-on liest Daten deines Huawei SUN2000 Wechselrichters per Modbus TCP a
   - Tages- und Gesamtenergieertrag
   - Inverter-Temperatur und Wirkungsgrad
 - Online-/Offline-Status mit:
-  - Binary Sensor „Huawei Solar Status“
+  - Binary Sensor „Huawei Solar Status"
   - Heartbeat/Timeout-Überwachung
   - MQTT Last Will (LWT) beim Broker
+- Konfigurierbares Logging mit verschiedenen Log-Levels
+- Performance-Monitoring und automatische Warnungen
 
 ## Voraussetzungen
 
@@ -29,13 +31,14 @@ Dieses Add-on liest Daten deines Huawei SUN2000 Wechselrichters per Modbus TCP a
 
 Beispielkonfiguration im Add-on-UI:
 
-    modbus_host: "192.168.1.100"  
-    modbus_port: 502  
-    modbus_device_id: 1  
-    mqtt_topic: "huawei-solar"  
-    debug: false  
-    status_timeout: 180  
-    poll_interval: 60  
+    modbus_host: "192.168.1.100"
+    modbus_port: 502
+    modbus_device_id: 1
+    mqtt_topic: "huawei-solar"
+    log_level: "INFO"
+    debug: false
+    status_timeout: 180
+    poll_interval: 60
 
 ### Optionen
 
@@ -51,8 +54,16 @@ Beispielkonfiguration im Add-on-UI:
 - **mqtt_topic**  
   Basis-Topic, unter dem die Daten veröffentlicht werden (z.B. `huawei-solar`).
 
+- **log_level**  
+  Logging-Detailgrad (Standard: `INFO`):
+
+  - `DEBUG`: Sehr detailliert - zeigt Performance-Metriken, einzelne Register-Reads, Zeitmessungen für jeden Schritt
+  - `INFO`: Normal - zeigt wichtige Ereignisse und aktuelle Datenpunkte (Solar/Grid/Battery Power)
+  - `WARNING`: Nur Warnungen und Fehler
+  - `ERROR`: Nur Fehler
+
 - **debug**  
-  `true` für ausführliche Logs (nur für Tests), `false` für normalen Betrieb.
+  Legacy-Option: `true` setzt Log-Level automatisch auf DEBUG (Standard: `false`).
 
 - **status_timeout**  
   Zeit in Sekunden, nach der der Status auf `offline` gesetzt wird, wenn keine erfolgreiche Abfrage mehr erfolgt ist (z.B. 180 Sekunden).
@@ -68,14 +79,14 @@ Beispielkonfiguration im Add-on-UI:
 - **Status (online/offline):**  
   `huawei-solar/status`  
   Wird genutzt für:
-  - Binary Sensor „Huawei Solar Status“
+  - Binary Sensor „Huawei Solar Status"
   - `availability_topic` aller Sensoren
 
 ## Entitäten in Home Assistant
 
 Nach dem Start des Add-ons werden automatisch MQTT Discovery Konfigurationen publiziert. Du findest die Entitäten dann unter:
 
-- Einstellungen → Geräte & Dienste → MQTT → Geräte → „Huawei Solar Inverter“
+- Einstellungen → Geräte & Dienste → MQTT → Geräte → „Huawei Solar Inverter"
 
 Typische Entitäten:
 
@@ -100,22 +111,65 @@ Typische Entitäten:
   - `binary_sensor.huawei_solar_status` (online/offline)
   - `sensor.inverter_status` (Textstatus)
 
-Zusätzliche „diagnostic“ Entitäten (z.B. detaillierte Ströme, Spannungen, Bus-Werte) sind standardmäßig deaktiviert und können bei Bedarf in Home Assistant manuell aktiviert werden.
+Zusätzliche „diagnostic" Entitäten (z.B. detaillierte Ströme, Spannungen, Bus-Werte) sind standardmäßig deaktiviert und können bei Bedarf in Home Assistant manuell aktiviert werden.
 
-## Logs & Fehleranalyse
+## Logging & Fehleranalyse
 
-- **Add-on Logs:**
-  - Einstellungen → Add-ons → Huawei Solar Modbus to MQTT → „Log“
-- **Typische Fehler:**
-  - Modbus-Verbindungsfehler:
-    - IP/Port prüfen
-    - Modbus TCP im Inverter aktivieren
-    - Slave ID testen (0, 1, 16, 100)
-  - MQTT-Verbindungsfehler:
-    - MQTT Broker in Home Assistant prüfen
-    - Zugangsdaten kontrollieren
+### Log-Levels
+
+Das Add-on bietet verschiedene Log-Levels:
+
+**INFO (Standard)** - Übersichtlich für den normalen Betrieb:
+
+    2025-12-08T08:37:00+0100 - huawei.main - INFO - Logging initialized with level: INFO
+    2025-12-08T08:37:00+0100 - huawei.main - INFO - Huawei Solar Modbus to MQTT starting
+    2025-12-08T08:37:01+0100 - huawei.main - INFO - AsyncHuaweiSolar created successfully (Slave ID: 1)
+    2025-12-08T08:37:02+0100 - huawei.main - INFO - Data published - Solar: 4500W | Grid: -200W | Battery: 800W (85%)
+
+**DEBUG** - Detailliert mit Performance-Metriken:
+
+    2025-12-08T08:37:02+0100 - huawei.main - DEBUG - Starting cycle #1
+    2025-12-08T08:37:02+0100 - huawei.main - DEBUG - Starting data acquisition cycle
+    2025-12-08T08:37:03+0100 - huawei.main - DEBUG - Modbus read completed in 1.842s (87 successful, 5 failed)
+    2025-12-08T08:37:03+0100 - huawei.transform - DEBUG - Transformation complete: 73 values extracted in 0.003s
+    2025-12-08T08:37:03+0100 - huawei.mqtt - DEBUG - MQTT publish completed in 0.124s
+    2025-12-08T08:37:03+0100 - huawei.main - DEBUG - Cycle complete in 1.969s (Modbus: 1.842s, Transform: 0.003s, MQTT: 0.124s)
+    2025-12-08T08:37:03+0100 - huawei.main - DEBUG - Heartbeat: Last successful read 0.0s ago (timeout: 180s)
+
+### Performance-Warnungen
+
+Bei langsamen Zyklen erscheinen automatisch Warnungen:
+
+    2025-12-08T08:37:02+0100 - huawei.main - WARNING - Cycle took 52.1s - close to poll_interval (60s). Consider increasing poll_interval.
+
+### Add-on Logs ansehen
+
+- Einstellungen → Add-ons → Huawei Solar Modbus to MQTT → „Log"
+
+### Typische Fehler
+
+- **Modbus-Verbindungsfehler:**
+
+  - IP/Port prüfen
+  - Modbus TCP im Inverter aktivieren
+  - Slave ID testen (0, 1, 16, 100)
+  - Bei `log_level: DEBUG` werden fehlgeschlagene Register-Reads angezeigt
+
+- **MQTT-Verbindungsfehler:**
+
+  - MQTT Broker in Home Assistant prüfen
+  - Zugangsdaten kontrollieren
+  - Im DEBUG-Modus werden MQTT-Verbindungsdetails geloggt
+
+- **Performance-Probleme:**
+  - Achte auf WARNING-Meldungen im Log
+  - Erhöhe `poll_interval`, wenn Zyklen zu lange dauern
+  - Bei DEBUG siehst du genaue Zeitmessungen für jeden Schritt
 
 ## Tipps
 
-- Für die erste Inbetriebnahme `debug: true` setzen, um mehr Details in den Logs zu sehen.
-- Wenn du einen zweiten Inverter nachrüsten solltest, kannst du später die Logik erweitern – aktuell ist das Add-on bewusst auf einen Inverter ausgelegt.
+- **Erste Inbetriebnahme:** Setze `log_level: DEBUG`, um alle Details zu sehen
+- **Normalbetrieb:** Nutze `log_level: INFO` für übersichtliche Logs
+- **Performance optimieren:** Achte auf die Cycle-Time im DEBUG-Log und passe `poll_interval` an
+- **Fehlersuche:** DEBUG-Level zeigt genau, welche Register gelesen werden und wo Probleme auftreten
+- **Mehrere Inverter:** Das Add-on ist aktuell auf einen Inverter ausgelegt, kann aber später erweitert werden
