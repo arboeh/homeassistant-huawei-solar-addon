@@ -1,9 +1,9 @@
+# mqtt.py
 import logging
 import os
 import json
 import time
 import paho.mqtt.client as mqtt
-
 
 # Logger für dieses Modul
 logger = logging.getLogger("huawei.mqtt")

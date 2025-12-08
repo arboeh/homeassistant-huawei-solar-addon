@@ -1,10 +1,9 @@
+# transform.py
 import logging
 import time
 
-
 # Logger für dieses Modul
 logger = logging.getLogger("huawei.transform")
-
 
 def get_value(register_value):
     """Safely extract value from register object"""

@@ -1,3 +1,4 @@
+# huawei2mqtt.py
 import asyncio
 import logging
 import os
@@ -14,7 +15,6 @@ from modbus_energy_meter.mqtt import (
     publish_discovery_configs,
 )
 from modbus_energy_meter.transform import transform_result
-
 
 # Logger für dieses Modul
 logger = logging.getLogger("huawei.main")
@@ -45,6 +45,16 @@ def init():
     # Root Logger konfigurieren
     root_logger = logging.getLogger()
     root_logger.setLevel(loglevel)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+    root_logger.addHandler(handler)
+
+    # Alte Handler entfernen (vermeidet Duplikate)
+    for h in root_logger.handlers[:]:
+        root_logger.removeHandler(h)
+    root_logger.addHandler(handler)
 
     # Pymodbus-Logging konfigurieren
     pymodbus_logger = logging.getLogger("pymodbus")
