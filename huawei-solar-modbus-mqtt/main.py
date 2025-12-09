@@ -1,84 +1,27 @@
-# huwai2mqtt.py
+# main.py
 import asyncio
 import logging
 import os
 import sys
 import time
 from typing import Dict, Any
+
 from huawei_solar import AsyncHuaweiSolar
-from huawei_solar.exceptions import DecodeError, ReadException
-from modbus_energy_meter.mqtt import (
-    publish_data as mqtt_publish_data,
-    publish_status,
-    publish_discovery_configs,
+from pymodbus.exceptions import ModbusException
+from pymodbus.pdu import ExceptionResponse
+
+from .config.registers import ESSENTIAL_REGISTERS
+from .mqtt_client import (
     connect_mqtt,
     disconnect_mqtt,
+    publish_status,
+    publish_discovery_configs,
+    publish_data
 )
-from modbus_energy_meter.transform import transform_result
+from .transform import transform_data
 
 # Logger
 logger = logging.getLogger("huawei.main")
-
-ESSENTIAL_REGISTERS = [
-    # Power & Energy (11)
-    "active_power",
-    "input_power",
-    "active_power_meter",
-    "storage_charge_discharge_power",
-    "storage_state_of_capacity",
-    "daily_yield_energy",
-    "accumulated_yield_energy",
-    "grid_exported_energy",
-    "grid_accumulated_energy",
-    "storage_charge_capacity_today",
-    "storage_discharge_capacity_today",
-
-    # PV Strings 1-4 (8)
-    "pv_01_voltage", "pv_01_current",
-    "pv_02_voltage", "pv_02_current",
-    "pv_03_voltage", "pv_03_current",
-    "pv_04_voltage", "pv_04_current",
-
-    # Battery (4)
-    "storage_total_charge",
-    "storage_total_discharge",
-    "storage_bus_voltage",
-    "storage_bus_current",
-
-    # Grid 3-Phase (9)
-    "grid_A_voltage",
-    "grid_B_voltage",
-    "grid_C_voltage",
-    "line_voltage_A_B",
-    "line_voltage_B_C",
-    "line_voltage_C_A",
-    "grid_frequency",
-    "meter_status",
-    "reactive_power_meter",
-
-    # Inverter Performance (6)
-    "internal_temperature",
-    "day_active_power_peak",
-    "power_factor",
-    "efficiency",
-    "reactive_power",
-    "insulation_resistance",
-
-    # Status & State (3)
-    "device_status",
-    "state_1",
-    "state_2",
-
-    # Device Information (4)
-    "model_name",
-    "serial_number",
-    "rated_power",
-    "startup_time",
-
-    # Extended (2)
-    "storage_running_status",
-    "alarm_1",
-]
 
 LAST_SUCCESS = 0
 
@@ -97,8 +40,10 @@ def _parse_log_level() -> int:
     """Parse HUAWEI_LOG_LEVEL oder Fallback."""
     level_str = os.environ.get("HUAWEI_LOG_LEVEL", "INFO").upper()
     level_map = {
-        "DEBUG": logging.DEBUG, "INFO": logging.INFO,
-        "WARNING": logging.WARNING, "ERROR": logging.ERROR
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARNING": logging.WARNING,
+        "ERROR": logging.ERROR
     }
 
     if os.environ.get("HUAWEI_MODBUS_DEBUG") == "yes":
@@ -173,7 +118,8 @@ async def read_registers(client: AsyncHuaweiSolar) -> Dict[str, Any]:
 
 
 async def main_once(client: AsyncHuaweiSolar) -> None:
-    """Ein kompletter Read-Publish-Zyklus."""
+    """Read essential registers and publish."""
+    logger.debug(f"Reading {len(ESSENTIAL_REGISTERS)} essential registers")
     global LAST_SUCCESS
     topic = os.environ.get("HUAWEI_MODBUS_MQTT_TOPIC")
     if not topic:
@@ -187,7 +133,7 @@ async def main_once(client: AsyncHuaweiSolar) -> None:
     try:
         data = await read_registers(client)
         modbus_duration = time.time() - modbus_start
-    except (DecodeError, ReadException) as e:
+    except (ModbusException, ExceptionResponse) as e:
         logger.warning(f"Read failed after {time.time() - start:.1f}s: {e}")
         raise
     except Exception as e:
@@ -200,11 +146,11 @@ async def main_once(client: AsyncHuaweiSolar) -> None:
 
     # Transform & Publish
     transform_start = time.time()
-    mqtt_data = transform_result(data)
+    mqtt_data = transform_data(data)
     transform_duration = time.time() - transform_start
 
     mqtt_start = time.time()
-    mqtt_publish_data(mqtt_data, topic)
+    publish_data(mqtt_data, topic)
     mqtt_duration = time.time() - mqtt_start
 
     LAST_SUCCESS = time.time()
@@ -284,14 +230,10 @@ async def main() -> None:
 
             try:
                 await main_once(client)
-            except DecodeError:
-                logger.error(f"DecodeError cycle #{cycle_count}")
+            except (ModbusException, ExceptionResponse):
+                logger.error(f"Modbus error cycle #{cycle_count}")
                 publish_status("offline", topic)
                 await asyncio.sleep(10)
-            except ReadException:
-                logger.error(f"Connection issue cycle #{cycle_count}")
-                publish_status("offline", topic)
-                await asyncio.sleep(30)
             except Exception as e:
                 logger.error(f"Cycle #{cycle_count} failed: {e}")
                 publish_status("offline", topic)
