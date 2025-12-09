@@ -7,7 +7,6 @@ import time
 from typing import Dict, Any
 from huawei_solar import AsyncHuaweiSolar
 from huawei_solar.exceptions import DecodeError, ReadException
-from dotenv import load_dotenv
 from modbus_energy_meter.mqtt import (
     publish_data as mqtt_publish_data,
     publish_status,
