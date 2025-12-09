@@ -66,4 +66,5 @@ bashio::log.info "━━━━━━━━━━━━━━━━━━━━�
 
 # Start Python application
 bashio::log.info "Starting Python application..."
-python3 -u /app/main.py
+cd /app
+exec python3 -u -m modbus_energy_meter.main
