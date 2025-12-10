@@ -56,5 +56,5 @@ Home Assistant Add-on für Huawei SUN2000 Wechselrichter via Modbus TCP → MQTT
 ## Credits
 
 **Basiert auf der Idee von:** [mjaschen/huawei-solar-modbus-to-mqtt](https://github.com/mjaschen/huawei-solar-modbus-to-mqtt)  
-**Verwendet:** Offizielle Huawei Modbus‑Bibliothek: [wlcrs/huawei-solar-lib](https://github.com/wlcrs/huawei-solar-lib)  
+**Verwendet Offizielle Huawei Modbus‑Bibliothek:** [wlcrs/huawei-solar-lib](https://github.com/wlcrs/huawei-solar-lib)  
 **Entwickelt von:** [arboeh](https://github.com/arboeh) | **Lizenz:** MIT
