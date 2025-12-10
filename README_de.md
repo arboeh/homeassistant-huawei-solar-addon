@@ -11,11 +11,11 @@
 
 Home Assistant Add-on für Huawei SUN2000 Wechselrichter via Modbus TCP → MQTT mit Auto-Discovery.
 
-**Version 1.3.0** - 47 Register, 59 Entitäten, ~5s Cycle-Time
+**Version 1.3.1** – 58 Register, 70+ Entitäten, ~5–6 s Zykluszeit
 
 ## Features
 
-- **Modbus TCP → MQTT:** 59 Entitäten mit Auto-Discovery
+- **Modbus TCP → MQTT:** 70+ Entitäten mit Auto-Discovery
 - **Vollständiges Monitoring:** Batterie, PV (1-4), Netz (3-Phasen), Ertrag, Grid Power
 - **Performance:** ~5s Cycle, konfigurierbar (30-60s empfohlen)
 
@@ -56,4 +56,5 @@ Home Assistant Add-on für Huawei SUN2000 Wechselrichter via Modbus TCP → MQTT
 ## Credits
 
 **Basiert auf der Idee von:** [mjaschen/huawei-solar-modbus-to-mqtt](https://github.com/mjaschen/huawei-solar-modbus-to-mqtt)  
+**Verwendet:** Offizielle Huawei Modbus‑Bibliothek: [wlcrs/huawei-solar-lib](https://github.com/wlcrs/huawei-solar-lib)  
 **Entwickelt von:** [arboeh](https://github.com/arboeh) | **Lizenz:** MIT

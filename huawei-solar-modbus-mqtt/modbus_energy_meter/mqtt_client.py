@@ -3,7 +3,7 @@ import logging
 import os
 import json
 import time
-import paho.mqtt.client as mqtt
+import paho.mqtt.client as mqtt  # type: ignore
 from typing import Dict, Any, List, Optional
 
 from .config.sensors_mqtt import NUMERIC_SENSORS, TEXT_SENSORS

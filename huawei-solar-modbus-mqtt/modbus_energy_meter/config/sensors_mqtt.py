@@ -1,13 +1,10 @@
-# modbus_energy_meter/config/sensors_mqtt.py
 from typing import Dict, Any, List
 
-
 NUMERIC_SENSORS: List[Dict[str, Any]] = [
-    # POWER (Main - Always Enabled)
     {
         "name": "Solar Power",
         "key": "power_active",
-        "unit": "W",
+        "unit_of_measurement": "W",
         "device_class": "power",
         "state_class": "measurement",
         "icon": "mdi:solar-power",
@@ -16,7 +13,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Input Power",
         "key": "power_input",
-        "unit": "W",
+        "unit_of_measurement": "W",
         "device_class": "power",
         "state_class": "measurement",
         "icon": "mdi:solar-panel",
@@ -25,7 +22,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Grid Power",
         "key": "meter_power_active",
-        "unit": "W",
+        "unit_of_measurement": "W",
         "device_class": "power",
         "state_class": "measurement",
         "icon": "mdi:transmission-tower",
@@ -34,17 +31,17 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Battery Power",
         "key": "battery_power",
-        "unit": "W",
+        "unit_of_measurement": "W",
         "device_class": "power",
         "state_class": "measurement",
         "icon": "mdi:battery-charging",
         "enabled": True,
     },
-    # ENERGY (Main - Always Enabled)
+
     {
         "name": "Solar Daily Yield",
         "key": "energy_yield_day",
-        "unit": "kWh",
+        "unit_of_measurement": "kWh",
         "device_class": "energy",
         "state_class": "total_increasing",
         "icon": "mdi:solar-power",
@@ -53,7 +50,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Solar Total Yield",
         "key": "energy_yield_accumulated",
-        "unit": "kWh",
+        "unit_of_measurement": "kWh",
         "device_class": "energy",
         "state_class": "total_increasing",
         "icon": "mdi:solar-power",
@@ -62,7 +59,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Grid Energy Exported",
         "key": "energy_grid_exported",
-        "unit": "kWh",
+        "unit_of_measurement": "kWh",
         "device_class": "energy",
         "state_class": "total_increasing",
         "icon": "mdi:transmission-tower-export",
@@ -71,17 +68,17 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Grid Energy Imported",
         "key": "energy_grid_accumulated",
-        "unit": "kWh",
+        "unit_of_measurement": "kWh",
         "device_class": "energy",
         "state_class": "total_increasing",
         "icon": "mdi:transmission-tower-import",
         "enabled": True,
     },
-    # BATTERY (Main - Always Enabled)
+
     {
         "name": "Battery SOC",
         "key": "battery_soc",
-        "unit": "%",
+        "unit_of_measurement": "%",
         "device_class": "battery",
         "state_class": "measurement",
         "icon": "mdi:battery",
@@ -90,7 +87,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Battery Charge Today",
         "key": "battery_charge_day",
-        "unit": "kWh",
+        "unit_of_measurement": "kWh",
         "device_class": "energy",
         "state_class": "total_increasing",
         "icon": "mdi:battery-plus",
@@ -99,7 +96,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Battery Discharge Today",
         "key": "battery_discharge_day",
-        "unit": "kWh",
+        "unit_of_measurement": "kWh",
         "device_class": "energy",
         "state_class": "total_increasing",
         "icon": "mdi:battery-minus",
@@ -108,7 +105,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Battery Total Charge",
         "key": "battery_charge_total",
-        "unit": "kWh",
+        "unit_of_measurement": "kWh",
         "device_class": "energy",
         "state_class": "total_increasing",
         "enabled": True,
@@ -116,7 +113,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Battery Total Discharge",
         "key": "battery_discharge_total",
-        "unit": "kWh",
+        "unit_of_measurement": "kWh",
         "device_class": "energy",
         "state_class": "total_increasing",
         "enabled": True,
@@ -124,7 +121,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Battery Bus Voltage",
         "key": "battery_bus_voltage",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": True,
@@ -132,25 +129,16 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Battery Bus Current",
         "key": "battery_bus_current",
-        "unit": "A",
+        "unit_of_measurement": "A",
         "device_class": "current",
         "state_class": "measurement",
         "enabled": True,
     },
-    # PV STRINGS - String 1 (Main, Enabled)
-    {
-        "name": "PV1 Power",
-        "key": "power_PV1",
-        "unit": "W",
-        "device_class": "power",
-        "state_class": "measurement",
-        "icon": "mdi:solar-panel",
-        "enabled": True,
-    },
+
     {
         "name": "PV1 Voltage",
         "key": "voltage_PV1",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": True,
@@ -158,25 +146,16 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "PV1 Current",
         "key": "current_PV1",
-        "unit": "A",
+        "unit_of_measurement": "A",
         "device_class": "current",
         "state_class": "measurement",
         "enabled": True,
     },
-    # PV STRINGS 2-4 (Optional, Disabled)
-    {
-        "name": "PV2 Power",
-        "key": "power_PV2",
-        "unit": "W",
-        "device_class": "power",
-        "state_class": "measurement",
-        "icon": "mdi:solar-panel",
-        "enabled": False,
-    },
+
     {
         "name": "PV2 Voltage",
         "key": "voltage_PV2",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": False,
@@ -184,24 +163,15 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "PV2 Current",
         "key": "current_PV2",
-        "unit": "A",
+        "unit_of_measurement": "A",
         "device_class": "current",
         "state_class": "measurement",
         "enabled": False,
     },
     {
-        "name": "PV3 Power",
-        "key": "power_PV3",
-        "unit": "W",
-        "device_class": "power",
-        "state_class": "measurement",
-        "icon": "mdi:solar-panel",
-        "enabled": False,
-    },
-    {
         "name": "PV3 Voltage",
         "key": "voltage_PV3",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": False,
@@ -209,24 +179,15 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "PV3 Current",
         "key": "current_PV3",
-        "unit": "A",
+        "unit_of_measurement": "A",
         "device_class": "current",
         "state_class": "measurement",
         "enabled": False,
     },
     {
-        "name": "PV4 Power",
-        "key": "power_PV4",
-        "unit": "W",
-        "device_class": "power",
-        "state_class": "measurement",
-        "icon": "mdi:solar-panel",
-        "enabled": False,
-    },
-    {
         "name": "PV4 Voltage",
         "key": "voltage_PV4",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": False,
@@ -234,16 +195,16 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "PV4 Current",
         "key": "current_PV4",
-        "unit": "A",
+        "unit_of_measurement": "A",
         "device_class": "current",
         "state_class": "measurement",
         "enabled": False,
     },
-    # INVERTER
+
     {
         "name": "Inverter Temperature",
         "key": "inverter_temperature",
-        "unit": "°C",
+        "unit_of_measurement": "°C",
         "device_class": "temperature",
         "state_class": "measurement",
         "enabled": True,
@@ -252,7 +213,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Inverter Efficiency",
         "key": "inverter_efficiency",
-        "unit": "%",
+        "unit_of_measurement": "%",
         "state_class": "measurement",
         "icon": "mdi:gauge",
         "enabled": True,
@@ -260,7 +221,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Day Peak Power",
         "key": "power_active_peak_day",
-        "unit": "W",
+        "unit_of_measurement": "W",
         "device_class": "power",
         "state_class": "measurement",
         "enabled": True,
@@ -268,7 +229,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Reactive Power",
         "key": "power_reactive",
-        "unit": "VAr",
+        "unit_of_measurement": "VAr",
         "device_class": "reactive_power",
         "state_class": "measurement",
         "enabled": True,
@@ -276,7 +237,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Power Factor",
         "key": "power_factor",
-        "unit": "",
+        "unit_of_measurement": "",
         "state_class": "measurement",
         "icon": "mdi:sine-wave",
         "enabled": True,
@@ -284,17 +245,17 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Insulation Resistance",
         "key": "inverter_insulation_resistance",
-        "unit": "MΩ",
+        "unit_of_measurement": "MΩ",
         "state_class": "measurement",
         "icon": "mdi:lightning-bolt-circle",
         "enabled": True,
         "entity_category": "diagnostic",
     },
-    # GRID - 3-Phase
+
     {
         "name": "Grid Voltage Phase A",
         "key": "voltage_grid_A",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": True,
@@ -302,7 +263,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Grid Voltage Phase B",
         "key": "voltage_grid_B",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": True,
@@ -310,7 +271,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Grid Voltage Phase C",
         "key": "voltage_grid_C",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": True,
@@ -318,7 +279,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Line Voltage A-B",
         "key": "voltage_line_AB",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": True,
@@ -326,7 +287,7 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Line Voltage B-C",
         "key": "voltage_line_BC",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
         "state_class": "measurement",
         "enabled": True,
@@ -334,80 +295,128 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Line Voltage C-A",
         "key": "voltage_line_CA",
-        "unit": "V",
+        "unit_of_measurement": "V",
         "device_class": "voltage",
-        "state_class": "measurement",
-        "enabled": True,
-    },
-    {
-        "name": "Grid Current Phase A",
-        "key": "current_grid_A",
-        "unit": "A",
-        "device_class": "current",
-        "state_class": "measurement",
-        "enabled": True,
-    },
-    {
-        "name": "Grid Current Phase B",
-        "key": "current_grid_B",
-        "unit": "A",
-        "device_class": "current",
-        "state_class": "measurement",
-        "enabled": True,
-    },
-    {
-        "name": "Grid Current Phase C",
-        "key": "current_grid_C",
-        "unit": "A",
-        "device_class": "current",
-        "state_class": "measurement",
-        "enabled": True,
-    },
-    {
-        "name": "Grid Power Phase A",
-        "key": "power_grid_A",
-        "unit": "W",
-        "device_class": "power",
-        "state_class": "measurement",
-        "enabled": True,
-    },
-    {
-        "name": "Grid Power Phase B",
-        "key": "power_grid_B",
-        "unit": "W",
-        "device_class": "power",
-        "state_class": "measurement",
-        "enabled": True,
-    },
-    {
-        "name": "Grid Power Phase C",
-        "key": "power_grid_C",
-        "unit": "W",
-        "device_class": "power",
         "state_class": "measurement",
         "enabled": True,
     },
     {
         "name": "Grid Frequency",
         "key": "frequency_grid",
-        "unit": "Hz",
+        "unit_of_measurement": "Hz",
+        "device_class": "frequency",
+        "state_class": "measurement",
+        "enabled": True,
+    },
+
+    {
+        "name": "Meter Reactive Power",
+        "key": "meter_reactive_power",
+        "unit_of_measurement": "VAr",
+        "device_class": "reactive_power",
+        "state_class": "measurement",
+        "enabled": True,
+    },
+
+    {
+        "name": "Meter Power Phase A",
+        "key": "power_meter_A",
+        "unit_of_measurement": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "icon": "mdi:transmission-tower",
+        "enabled": True,
+    },
+    {
+        "name": "Meter Power Phase B",
+        "key": "power_meter_B",
+        "unit_of_measurement": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "icon": "mdi:transmission-tower",
+        "enabled": True,
+    },
+    {
+        "name": "Meter Power Phase C",
+        "key": "power_meter_C",
+        "unit_of_measurement": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "icon": "mdi:transmission-tower",
+        "enabled": True,
+    },
+
+    {
+        "name": "Meter Line Voltage A-B",
+        "key": "voltage_meter_line_AB",
+        "unit_of_measurement": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "enabled": True,
+    },
+    {
+        "name": "Meter Line Voltage B-C",
+        "key": "voltage_meter_line_BC",
+        "unit_of_measurement": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "enabled": True,
+    },
+    {
+        "name": "Meter Line Voltage C-A",
+        "key": "voltage_meter_line_CA",
+        "unit_of_measurement": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "enabled": True,
+    },
+
+    {
+        "name": "Meter Current Phase A",
+        "key": "current_meter_A",
+        "unit_of_measurement": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "enabled": True,
+    },
+    {
+        "name": "Meter Current Phase B",
+        "key": "current_meter_B",
+        "unit_of_measurement": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "enabled": True,
+    },
+    {
+        "name": "Meter Current Phase C",
+        "key": "current_meter_C",
+        "unit_of_measurement": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "enabled": True,
+    },
+
+    {
+        "name": "Meter Frequency",
+        "key": "frequency_meter",
+        "unit_of_measurement": "Hz",
         "device_class": "frequency",
         "state_class": "measurement",
         "enabled": True,
     },
     {
-        "name": "Grid Reactive Power",
-        "key": "meter_reactive_power",
-        "unit": "VAr",
-        "device_class": "reactive_power",
+        "name": "Meter Power Factor",
+        "key": "power_factor_meter",
+        "unit_of_measurement": "",
         "state_class": "measurement",
+        "icon": "mdi:sine-wave",
         "enabled": True,
     },
-    # DEVICE INFO (Diagnostic)
+
     {
         "name": "Rated Power",
         "key": "rated_power",
-        "unit": "W",
+        "unit_of_measurement": "W",
         "device_class": "power",
         "state_class": "measurement",
         "icon": "mdi:gauge",
@@ -417,14 +426,13 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
     {
         "name": "Alarm Code",
         "key": "alarm_1",
-        "unit": "",
+        "unit_of_measurement": "",
         "state_class": "measurement",
         "icon": "mdi:alert-circle",
         "enabled": True,
         "entity_category": "diagnostic",
     },
 ]
-
 
 TEXT_SENSORS: List[Dict[str, Any]] = [
     {
@@ -475,14 +483,8 @@ TEXT_SENSORS: List[Dict[str, Any]] = [
         "entity_category": "diagnostic",
     },
     {
-        "name": "Inverter State 3",
-        "key": "inverter_state_3",
-        "enabled": False,
-        "entity_category": "diagnostic",
-    },
-    {
         "name": "Inverter Startup Time",
-        "key": "inverter_startup_time",
+        "key": "startup_time",
         "device_class": "timestamp",
         "enabled": False,
         "entity_category": "diagnostic",

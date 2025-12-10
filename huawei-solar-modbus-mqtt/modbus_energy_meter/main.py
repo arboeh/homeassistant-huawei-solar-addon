@@ -6,9 +6,9 @@ import sys
 import time
 from typing import Dict, Any
 
-from huawei_solar import AsyncHuaweiSolar
-from pymodbus.exceptions import ModbusException
-from pymodbus.pdu import ExceptionResponse
+from huawei_solar import AsyncHuaweiSolar  # type: ignore
+from pymodbus.exceptions import ModbusException  # type: ignore
+from pymodbus.pdu import ExceptionResponse  # type: ignore
 
 from .config.registers import ESSENTIAL_REGISTERS
 from .mqtt_client import (
@@ -157,11 +157,10 @@ async def main_once(client: AsyncHuaweiSolar) -> None:
     cycle_duration = time.time() - start
 
     logger.info(
-        "Published - Solar: %dW | Grid: %dW | Battery: %dW (%.1f%%)",
+        "Published - Solar: %dW | Grid: %dW | Battery: %dW",
         mqtt_data.get('power_active', 0),
         mqtt_data.get('meter_power_active', 0),
-        mqtt_data.get('battery_power', 0),
-        mqtt_data.get('battery_soc', 0)
+        mqtt_data.get('battery_power', 0)
     )
 
     logger.debug("Cycle: %.1fs (Modbus: %.1fs, Transform: %.2fs, MQTT: %.2fs)",

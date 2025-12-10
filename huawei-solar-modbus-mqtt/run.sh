@@ -5,7 +5,7 @@ bashio::log.info "🚀 Starting Huawei Solar Modbus → MQTT Add-on..."
 # Modbus Configuration
 export HUAWEI_MODBUS_HOST=$(bashio::config 'modbus_host')
 export HUAWEI_MODBUS_PORT=$(bashio::config 'modbus_port')
-export HUAWEI_MODBUS_DEVICE_ID=$(bashio::config 'modbus_device_id')
+export HUAWEI_MODBUS_DEVICE_ID=$(bashio::config 'slave_id')
 
 # MQTT Topic & Intervals
 export HUAWEI_MODBUS_MQTT_TOPIC=$(bashio::config 'mqtt_topic')
@@ -57,12 +57,12 @@ else
 fi
 
 # Connection Summary
-bashio::log.info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+bashio::log.info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 bashio::log.info "📡 Inverter: ${HUAWEI_MODBUS_HOST}:${HUAWEI_MODBUS_PORT} (Slave ID: ${HUAWEI_MODBUS_DEVICE_ID})"
 bashio::log.info "📨 MQTT: ${HUAWEI_MODBUS_MQTT_BROKER}:${HUAWEI_MODBUS_MQTT_PORT}"
 bashio::log.info "📢 Topic: ${HUAWEI_MODBUS_MQTT_TOPIC}"
 bashio::log.info "⏱️  Poll Interval: ${HUAWEI_POLL_INTERVAL}s | Timeout: ${HUAWEI_STATUS_TIMEOUT}s"
-bashio::log.info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+bashio::log.info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Start Python application
 bashio::log.info "Starting Python application..."

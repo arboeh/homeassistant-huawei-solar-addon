@@ -1,32 +1,17 @@
 # Changelog
 
+## [1.3.1] - 2025-12-10
+- Register-Set auf **58 Essential Registers** erweitert; alle Namen strikt an `huawei-solar-lib` angepasst (inkl. Grid-/Meter-Register und Groß-/Kleinschreibung). [file:60]  
+- Vollständige 3‑Phasen‑Smart‑Meter-Unterstützung: Phasenleistung, -strom, Leiterspannungen, Frequenz und Leistungsfaktor werden jetzt als eigene MQTT-Werte publiziert. [file:60]  
+- MQTT‑Discovery-Sensoren mit den neuen Keys synchronisiert und `unit_of_measurement` konsequent verwendet, konform zur Home‑Assistant‑MQTT‑Spezifikation. [web:64]  
+- PV‑Power‑Sensoren entfernt; es werden nur noch PV‑Spannung/-Strom übertragen, sodass die Leistung bei Bedarf in Home Assistant per Template berechnet werden kann. [file:60]  
+- Add-on‑Option `modbus_device_id` in `slave_id` umbenannt, um Konflikte mit Home‑Assistant‑Device‑IDs zu vermeiden.  
+
+---
+
 ## [1.3.0] - 2025-12-09
-### 🏗️ **CODE-REFACTORING**
-**Configs ausgelagert**
-
-### Added
-- **Config-Modul (`config/`):** Zentrale Verwaltung
-  - `registers.py`: 47 Essential Registers
-  - `mappings.py`: Register-Mapping + Defaults
-  - `sensors_mqtt.py`: 58 Sensor-Definitionen
-- **5 neue Register (42 → 47):**
-  - `active_power_meter` (37113): Grid Power
-  - `storage_charge/discharge_capacity_today`: Battery Today
-  - `meter_status`: Meter Online-Status
-  - `reactive_power_meter`: Grid Reactive Power
-- **13 neue Entities (46 → 59):** Battery Bus, Line Voltages, Grid Details
-
-### Changed
-- **Package-Struktur:** `main.py` + `mqtt_client.py` jetzt in `modbus_energy_meter/`
-- **Code-Reduktion:** `mqtt_client.py` 700 → 180 Zeilen (-74%)
-- **Module-Import:** `python3 -m modbus_energy_meter.main` statt direkter Ausführung
-
-### Performance
-| Metric | v1.2.1 | v1.3.0 |
-|--------|--------|--------|
-| Registers | 42 | **47** (+12%) |
-| Entities | 46 | **59** (+28%) |
-| Cycle Time | 4,6s | **5,2s** (+0,6s) |
+**Config:** Config nach config/ ausgelagert (registers.py, mappings.py, sensors_mqtt.py) mit 47 Essential Registers und 58 Sensoren.​  
+**Register:** Fünf neue Register (u. a. Smart‑Meter‑Power, Battery‑Today, Meter‑Status, Grid‑Reactive‑Power) und 13 zusätzliche Entities für Batterie‑Bus und Netzdetails.​
 
 ---
 
