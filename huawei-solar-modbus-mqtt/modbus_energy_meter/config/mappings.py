@@ -52,8 +52,8 @@ REGISTER_MAPPING: Dict[str, str] = {
     'storage_charge_discharge_power': 'battery_power',
     'storage_bus_voltage': 'battery_bus_voltage',
     'storage_bus_current': 'battery_bus_current',
-    'storage_charge_capacity_today': 'battery_charge_day',
-    'storage_discharge_capacity_today': 'battery_discharge_day',
+    'storage_current_day_charge_capacity': 'battery_charge_day',
+    'storage_current_day_discharge_capacity': 'battery_discharge_day',
     'storage_total_charge': 'battery_charge_total',
     'storage_total_discharge': 'battery_discharge_total',
     'storage_running_status': 'battery_status',
@@ -62,7 +62,6 @@ REGISTER_MAPPING: Dict[str, str] = {
     'state_1': 'inverter_state_1',
     'state_2': 'inverter_state_2',
     'startup_time': 'startup_time',
-    'alarm_1': 'alarm_1',
 
     'internal_temperature': 'inverter_temperature',
     'efficiency': 'inverter_efficiency',

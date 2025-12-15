@@ -423,15 +423,6 @@ NUMERIC_SENSORS: List[Dict[str, Any]] = [
         "enabled": True,
         "entity_category": "diagnostic",
     },
-    {
-        "name": "Alarm Code",
-        "key": "alarm_1",
-        "unit_of_measurement": "",
-        "state_class": "measurement",
-        "icon": "mdi:alert-circle",
-        "enabled": True,
-        "entity_category": "diagnostic",
-    },
 ]
 
 TEXT_SENSORS: List[Dict[str, Any]] = [

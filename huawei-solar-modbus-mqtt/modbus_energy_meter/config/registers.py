@@ -10,8 +10,8 @@ ESSENTIAL_REGISTERS = [
     "accumulated_yield_energy",
     "grid_exported_energy",
     "grid_accumulated_energy",
-    "storage_charge_capacity_today",
-    "storage_discharge_capacity_today",
+    "storage_current_day_charge_capacity",
+    "storage_current_day_discharge_capacity",
 
     "pv_01_voltage",
     "pv_01_current",
@@ -66,5 +66,4 @@ ESSENTIAL_REGISTERS = [
     "startup_time",
 
     "storage_running_status",
-    "alarm_1",
 ]
