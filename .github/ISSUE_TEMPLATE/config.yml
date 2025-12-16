@@ -1,8 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Home Assistant Community Discussion
-    url: https://community.home-assistant.io/
-    about: For general questions, visit the Home Assistant Community
+    url: https://community.home-assistant.io/t/add-on-huawei-solar-modbus-to-mqtt-sun2000-mqtt-home-assistant/958230
+    about: For general questions, visit the Home Assistant Community Addon Topic
   - name: Documentation
-    url: https://github.com/DEIN-USERNAME/DEIN-REPO/blob/main/README.md
+    url: blob/main/huawei-solar-modbus-mqtt/DOCS.md
     about: Read the documentation before opening an issue
+  - name: Changelog
+    url: blob/main/huawei-solar-modbus-mqtt/CHANGELOG.md
+    about: Check recent changes and bug fixes
