@@ -11,14 +11,16 @@
 
 Home Assistant Add-on für Huawei SUN2000 Wechselrichter via Modbus TCP → MQTT mit Auto-Discovery.
 
-**Version 1.3.4** – 57 Register, 69+ Entitäten, ~5–6 s Zykluszeit  
-**Changelog** - [CHANGELOG](huawei-solar-modbus-mqtt/CHANGELOG.md)
+**Version 1.4.0** – 58 Essential Registers, 69+ Entitäten, ~2–5 s Zykluszeit  
+**Changelog** - [CHANGELOG.md](huawei-solar-modbus-mqtt/CHANGELOG.md)
 
 ## Features
 
 - **Modbus TCP → MQTT:** 69+ Entitäten mit Auto-Discovery
 - **Vollständiges Monitoring:** Batterie, PV (1-4), Netz (3-Phasen), Ertrag, Grid Power
-- **Performance:** ~5s Cycle, konfigurierbar (30-60s empfohlen)
+- **Performance:** ~2-5s Cycle, konfigurierbar (30-60s empfohlen)
+- **Error Tracking:** Intelligente Fehler-Aggregation mit Downtime-Tracking
+- **Optimiertes Logging:** Bashio Log-Level Synchronisation
 
 ## Installation
 
@@ -28,31 +30,53 @@ Home Assistant Add-on für Huawei SUN2000 Wechselrichter via Modbus TCP → MQTT
 
 ## Konfiguration
 
-    modbus_host: "192.168.1.100" # Inverter IP
-    modbus_device_id: 1 # Slave ID (1 oder 16)
-    mqtt_topic: "huawei-solar"
-    poll_interval: 30 # Sekunden
-    log_level: "INFO"
+Die Add-on-Konfiguration erfolgt über die Home Assistant UI mit übersetzten deutschen Feldnamen:
 
-**Auto-MQTT:** `mqtt_host` leer lassen → nutzt HA MQTT Service automatisch
+- **Modbus Host:** IP-Adresse des Huawei Solar Inverters (z.B. `192.168.1.100`)
+- **Modbus Port:** Port für die Modbus-Verbindung (Standard: `502`)
+- **Slave ID:** Modbus Slave ID des Inverters (meist `1`, manchmal `16` oder `0`)
+- **MQTT Broker:** Hostname oder IP-Adresse des MQTT Brokers (z.B. `core-mosquitto`)
+- **MQTT Port:** Port des MQTT Brokers (Standard: `1883`)
+- **MQTT Benutzername:** Benutzername für die MQTT-Authentifizierung (optional)
+- **MQTT Passwort:** Passwort für die MQTT-Authentifizierung (optional)
+- **MQTT Topic:** Basis-Topic für MQTT-Nachrichten (Standard: `huawei-solar`)
+- **Log-Level:** Detailgrad der Protokollierung (`DEBUG` | `INFO` | `WARNING` | `ERROR`)
+- **Status Timeout:** Timeout in Sekunden für Statusprüfungen (30-600, Standard: `180`)
+- **Abfrageintervall:** Intervall in Sekunden zwischen Modbus-Abfragen (10-300, Standard: `30`)
+
+**Auto-MQTT:** MQTT Broker, Benutzername und Passwort leer lassen → nutzt HA MQTT Service automatisch
 
 ## Wichtige Entitäten
 
-| Kategorie | Sensoren |
-|-----------|----------|
-| **Power** | `solar_power`, `grid_power`, `battery_power`, `pv1-4_power` |
-| **Energy** | `daily_yield`, `total_yield`, `grid_exported/imported` |
-| **Battery** | `battery_soc`, `charge/discharge_today`, `bus_voltage/current` |
-| **Grid** | `voltage_phase_a/b/c`, `line_voltage_ab/bc/ca`, `frequency` |
-| **Device** | `model_name`, `serial_number`, `efficiency`, `temperature` |
+| Kategorie   | Sensoren                                                                                 |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| **Power**   | `solar_power`, `input_power`, `grid_power`, `battery_power`, `pv1-4_power`               |
+| **Energy**  | `daily_yield`, `total_yield`, `grid_exported/imported`                                   |
+| **Battery** | `battery_soc`, `charge/discharge_today`, `total_charge/discharge`, `bus_voltage/current` |
+| **Grid**    | `voltage_phase_a/b/c`, `line_voltage_ab/bc/ca`, `frequency`                              |
+| **Meter**   | `meter_power_phase_a/b/c`, `meter_current_a/b/c`, `meter_reactive_power`                 |
+| **Device**  | `model_name`, `serial_number`, `efficiency`, `temperature`, `rated_power`                |
+| **Status**  | `inverter_status`, `battery_status`, `meter_status`                                      |
+
+## Was ist neu in 1.4.0?
+
+**Features:** Error Tracker mit Downtime-Tracking, verbesserte Logging-Architektur, Bashio Log-Level Sync, Abfrageintervall Default auf 30s optimiert  
+**Improvements:** ENV-Variablen konsistent (`HUAWEI_SLAVE_ID`), redundantes Logging entfernt, Dockerfile vereinfacht  
+**Bugfixes:** Docstrings korrigiert, Connection Recovery zeigt Downtime in Sekunden  
+**Breaking Changes:** Keine – vollständig backwards-compatible ✅
 
 ## Fehlerbehebung
 
-**Keine Verbindung:** Modbus TCP aktivieren, IP/Slave-ID prüfen (1/16/0 testen), `log_level: DEBUG`  
-**MQTT Fehler:** `mqtt_host: "core-mosquitto"` nutzen, Credentials leer lassen  
-**Performance:** `poll_interval: 60` bei Cycle-Warnungen
+**Keine Verbindung:** Modbus TCP aktivieren, IP/Slave-ID prüfen (1/16/0 testen), Log-Level auf `DEBUG` setzen  
+**MQTT Fehler:** MQTT Broker auf `core-mosquitto` setzen, Credentials leer lassen  
+**Performance:** Abfrageintervall auf 60 bei Cycle-Warnungen erhöhen
 
-**Logs:** Add-ons → Huawei Solar → Log-Tab
+**Logs:** Add-ons → Huawei Solar Modbus to MQTT → Log-Tab
+
+## Dokumentation
+
+- **[DOCS.md](huawei-solar-modbus-mqtt/DOCS.md)** - Vollständige Dokumentation
+- **[CHANGELOG.md](huawei-solar-modbus-mqtt/CHANGELOG.md)** - Versionshistorie
 
 ## Credits
 

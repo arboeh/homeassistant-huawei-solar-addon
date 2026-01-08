@@ -1,10 +1,53 @@
+# Version Control
 .git/
-.github/
-.vscode/
-*.md
-CHANGELOG.md
-LICENSE
 .gitignore
+.gitattributes
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
 .pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Documentation & Development
+*.md
+!README.md
+CHANGELOG.md
+DOCS.md
+.github/
+docs/
+
+# Images (werden separat kopiert)
+# Kommentiert, weil icon.png + logo.png im Image sind
+# *.png
+
+# Logs & Temp
+*.log
+tmp/
+temp/
+.DS_Store
+Thumbs.db
+
+# Home Assistant spezifisch
+options.json
+data/
+backup/
+
+# Build artifacts
+*.tar
+*.zip

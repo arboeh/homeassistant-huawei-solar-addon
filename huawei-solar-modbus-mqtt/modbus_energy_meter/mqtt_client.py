@@ -175,9 +175,13 @@ def _publish_status_sensor(client: mqtt.Client, base_topic: str,
 
 
 def publish_data(data: Dict[str, Any], topic: str) -> None:
-    """Publish sensor data."""
-    client = _get_mqtt_client()
+    """
+    Publish sensor data to MQTT.
 
+    Raises:
+        Exception: If MQTT publish fails or times out.
+    """
+    client = _get_mqtt_client()
     data["last_update"] = int(time.time())
 
     if logger.isEnabledFor(logging.DEBUG):
@@ -196,13 +200,12 @@ def publish_data(data: Dict[str, Any], topic: str) -> None:
 
 def publish_status(status: str, topic: str) -> None:
     """Publish online/offline status."""
-    logger.debug(f"Status '{status}' → {topic}/status")
     client = _get_mqtt_client()
+    status_topic = f"{topic}/status"
 
     try:
-        status_topic = f"{topic}/status"
         result = client.publish(status_topic, status, qos=1, retain=True)
         result.wait_for_publish(timeout=1.0)
-        logger.info(f"Status published: '{status}' → {status_topic}")
+        logger.debug(f"Status: '{status}' → {status_topic}")  # Nur DEBUG
     except Exception as e:
-        logger.error(f"MQTT status publish failed: {e}")
+        logger.error(f"Status publish failed: {e}")

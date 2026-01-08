@@ -13,24 +13,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: googleapis/release-please-action@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run release-please
+        uses: googleapis/release-please-action@v4
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: simple
-          # PRs und GitHub-Release NICHT erstellen, nur Tag + Dateien aktualisieren
-          skip-github-pull-request: true
+          skip-github-pull-request: false
           skip-github-release: false
-
-      - uses: actions/checkout@v4
-        if: ${{ steps.release.outputs.release_created }}
 
       - name: Update config.yaml version
         if: ${{ steps.release.outputs.release_created }}
         run: |
-          sed -i 's/version: .*/version: ${{ steps.release.outputs.version }}/' huawei-solar-modbus-mqtt/config.yaml
+          VERSION="${{ steps.release.outputs.version }}"
+          echo "Updating config.yaml to version ${VERSION}"
+          sed -i "s/^version: .*/version: ${VERSION}/" huawei-solar-modbus-mqtt/config.yaml
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add huawei-solar-modbus-mqtt/config.yaml
-          git commit -m "chore: update version to ${{ steps.release.outputs.version }}"
-          git push
+          git commit -m "chore: update config.yaml version to ${VERSION}" || echo "No changes to commit"
+          git push origin main
+
+      - name: Publish release summary
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          echo "🎉 Release ${{ steps.release.outputs.version }} created successfully!"
+          echo "📦 Tag: ${{ steps.release.outputs.tag_name }}"
+          echo "🔗 Release URL: ${{ steps.release.outputs.html_url }}"
