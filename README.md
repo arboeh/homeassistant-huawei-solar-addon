@@ -11,7 +11,7 @@
 
 Home Assistant Add-on for Huawei SUN2000 inverters via Modbus TCP → MQTT with Auto-Discovery.
 
-**Version 1.4.0** – 58 Essential Registers, 69+ entities, ~2–5 s cycle time  
+**Version 1.4.1** – 58 Essential Registers, 69+ entities, ~2–5 s cycle time  
 **Changelog** - [CHANGELOG.md](huawei-solar-modbus-mqtt/CHANGELOG.md)
 
 ## Features
@@ -58,12 +58,11 @@ Add-on configuration via Home Assistant UI with translated field names:
 | **Device**  | `model_name`, `serial_number`, `efficiency`, `temperature`, `rated_power`                |
 | **Status**  | `inverter_status`, `battery_status`, `meter_status`                                      |
 
-## What's new in 1.4.0?
+## What's new in 1.4.1?
 
-**Features:** Error tracker with downtime tracking, improved logging architecture, Bashio log level sync, poll interval default optimized to 30s  
-**Improvements:** ENV variables consistently named (`HUAWEI_SLAVE_ID`), redundant logging removed, Dockerfile simplified  
-**Bugfixes:** Docstrings corrected, connection recovery shows downtime in seconds  
-**Breaking Changes:** None – fully backwards-compatible ✅
+**Improvements:** Enhanced startup logging with emoji icons (🚀🔌📡📍⏱️), visual separator lines in connection summary, bashio log level dynamically synced with HUAWEI_LOG_LEVEL
+
+**Previous (1.4.0):** Error tracker with downtime tracking, improved logging architecture, poll interval default optimized to 30s
 
 ## Troubleshooting
 
