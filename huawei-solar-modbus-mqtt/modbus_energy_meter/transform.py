@@ -14,8 +14,10 @@ def transform_data(data: Dict[str, Any]) -> Dict[str, Any]:
     start = time.time()
 
     # Transform with mapping
-    result = {mqtt_key: get_value(data.get(register_key))
-              for register_key, mqtt_key in REGISTER_MAPPING.items()}
+    result = {
+        mqtt_key: get_value(data.get(register_key))
+        for register_key, mqtt_key in REGISTER_MAPPING.items()
+    }
 
     # Critical defaults for missing keys
     for key, default in CRITICAL_DEFAULTS.items():
@@ -39,12 +41,12 @@ def get_value(register_value: Any) -> Optional[Any]:
 
     try:
         # Extract value
-        if hasattr(register_value, 'value'):
+        if hasattr(register_value, "value"):
             value = register_value.value
 
-            if hasattr(value, 'name'):  # Enum
+            if hasattr(value, "name"):  # Enum
                 return value.name
-            if hasattr(value, 'isoformat'):  # Datetime
+            if hasattr(value, "isoformat"):  # Datetime
                 return value.isoformat()
         else:
             value = register_value
@@ -58,8 +60,7 @@ def get_value(register_value: Any) -> Optional[Any]:
         return value
 
     except Exception as e:
-        logger.warning(
-            f"Value extract failed: {type(register_value).__name__}: {e}")
+        logger.warning(f"Value extract failed: {type(register_value).__name__}: {e}")
         return None
 
 
@@ -74,8 +75,7 @@ def _cleanup_result(data: Dict[str, Any]) -> Dict[str, Any]:
         # Special handling for lists (inverter states)
         if isinstance(value, list):
             logger.debug(f"Converting {key}: list → str")
-            value = ','.join(str(v)
-                             for v in value if v)  # Join non-empty values
+            value = ",".join(str(v) for v in value if v)  # Join non-empty values
             if not value:  # Empty list or all None
                 continue
 

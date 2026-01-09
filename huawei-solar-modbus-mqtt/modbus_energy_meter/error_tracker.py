@@ -27,7 +27,7 @@ class ConnectionErrorTracker:
                 "first_seen": now,
                 "last_logged": now,
                 "count": 1,
-                "details": details
+                "details": details,
             }
             logger.error(f"Connection error: {error_type} - {details}")
             return True
@@ -67,5 +67,5 @@ class ConnectionErrorTracker:
         return {
             "active_errors": len(self.errors),
             "total_failures": sum(e["count"] for e in self.errors.values()),
-            "last_success": self.last_success_time
+            "last_success": self.last_success_time,
         }

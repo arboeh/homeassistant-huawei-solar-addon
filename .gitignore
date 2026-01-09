@@ -40,3 +40,5 @@ htmlcov/
 # Local development/testing
 huawei-solar-modbus-mqtt/data/
 options.json
+
+/huawei-solar-modbus-mqtt/run_local.py

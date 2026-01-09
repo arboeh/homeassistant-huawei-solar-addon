@@ -17,7 +17,7 @@ from .mqtt_client import (
     disconnect_mqtt,
     publish_status,
     publish_discovery_configs,
-    publish_data
+    publish_data,
 )
 from .transform import transform_data
 
@@ -47,7 +47,7 @@ def _parse_log_level() -> int:
         "DEBUG": logging.DEBUG,
         "INFO": logging.INFO,
         "WARNING": logging.WARNING,
-        "ERROR": logging.ERROR
+        "ERROR": logging.ERROR,
     }
 
     if os.environ.get("HUAWEI_MODBUS_DEBUG") == "yes":
@@ -66,9 +66,9 @@ def _setup_root_logger(level: int) -> None:
         root.removeHandler(handler)
 
     handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    ))
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
     root.addHandler(handler)
 
 
@@ -76,8 +76,7 @@ def _configure_pymodbus(level: int) -> None:
     """Pymodbus Logging konfigurieren - nur Errors zeigen."""
     pymodbus_logger = logging.getLogger("pymodbus")
     # Immer ERROR, außer bei DEBUG
-    pymodbus_logger.setLevel(logging.ERROR if level !=
-                             logging.DEBUG else logging.DEBUG)
+    pymodbus_logger.setLevel(logging.ERROR if level != logging.DEBUG else logging.DEBUG)
 
 
 def _configure_huawei_solar(level: int) -> None:
@@ -102,7 +101,7 @@ def heartbeat(topic: str) -> None:
 
     if offline_duration > timeout:
         # Nur einmal loggen beim Übergang zu offline
-        if offline_duration < timeout + 5:  # Innerhalb 5s nach Timeout
+        if offline_duration < timeout + 5:
             error_status = error_tracker.get_status()
             logger.warning(
                 f"Inverter offline for {int(offline_duration)}s "
@@ -112,36 +111,37 @@ def heartbeat(topic: str) -> None:
             )
         publish_status("offline", topic)
     else:
-        logger.debug(
-            f"Heartbeat OK: {offline_duration:.1f}s since last success")
+        logger.debug(f"Heartbeat OK: {offline_duration:.1f}s since last success")
 
 
-def log_cycle_summary(cycle_num: int, timings: Dict[str, float],
-                      data: Dict[str, Any]) -> None:
+def log_cycle_summary(
+    cycle_num: int, timings: Dict[str, float], data: Dict[str, Any]
+) -> None:
     """Log cycle summary - can be JSON for machine parsing."""
 
     if os.environ.get("HUAWEI_LOG_FORMAT") == "json":
         import json
+
         summary = {
             "cycle": cycle_num,
             "timestamp": time.time(),
             "timings": timings,
             "power": {
-                "pv": data.get('power_input', 0),
-                "ac_out": data.get('power_active', 0),
-                "grid": data.get('meter_power_active', 0),
-                "battery": data.get('battery_power', 0)
-            }
+                "pv": data.get("power_input", 0),
+                "ac_out": data.get("power_active", 0),
+                "grid": data.get("meter_power_active", 0),
+                "battery": data.get("battery_power", 0),
+            },
         }
         logger.info(json.dumps(summary))
     else:
         # Standard human-readable log
         logger.info(
             "📊 Published - PV: %dW | AC Out: %dW | Grid: %dW | Battery: %dW",
-            data.get('power_input', 0),
-            data.get('power_active', 0),
-            data.get('meter_power_active', 0),
-            data.get('battery_power', 0)
+            data.get("power_input", 0),
+            data.get("power_active", 0),
+            data.get("meter_power_active", 0),
+            data.get("battery_power", 0),
         )
 
 
@@ -161,8 +161,9 @@ async def read_registers(client: AsyncHuaweiSolar) -> Dict[str, Any]:
             logger.debug(f"Failed {name}")
 
     duration = time.time() - start
-    logger.info("Essential read: %.1fs (%d/%d)", duration,
-                successful, len(ESSENTIAL_REGISTERS))
+    logger.info(
+        "Essential read: %.1fs (%d/%d)", duration, successful, len(ESSENTIAL_REGISTERS)
+    )
 
     return data
 
@@ -182,7 +183,7 @@ async def main_once(client: AsyncHuaweiSolar, cycle_num: int) -> None:
     try:
         data = await read_registers(client)
         modbus_duration = time.time() - modbus_start
-    except (ModbusException, ExceptionResponse) as e:
+    except (ModbusException, ExceptionResponse) as e:  # type: ignore[misc]
         logger.warning(f"Read failed after {time.time() - start:.1f}s: {e}")
         raise
     except Exception as e:
@@ -207,38 +208,47 @@ async def main_once(client: AsyncHuaweiSolar, cycle_num: int) -> None:
 
     # Timings Dict für log_cycle_summary
     timings = {
-        'modbus': modbus_duration,
-        'transform': transform_duration,
-        'mqtt': mqtt_duration,
-        'total': cycle_duration
+        "modbus": modbus_duration,
+        "transform": transform_duration,
+        "mqtt": mqtt_duration,
+        "total": cycle_duration,
     }
 
-    # ← HIER: log_cycle_summary statt direktem logger.info
     log_cycle_summary(cycle_num, timings, mqtt_data)
 
     # Debug-Details nur bei DEBUG-Level
-    logger.debug("Cycle: %.1fs (Modbus: %.1fs, Transform: %.2fs, MQTT: %.2fs)",
-                 cycle_duration, modbus_duration, transform_duration, mqtt_duration)
+    logger.debug(
+        "Cycle: %.1fs (Modbus: %.1fs, Transform: %.2fs, MQTT: %.2fs)",
+        cycle_duration,
+        modbus_duration,
+        transform_duration,
+        mqtt_duration,
+    )
 
     # Performance Warning
     poll_interval = int(os.environ.get("HUAWEI_POLL_INTERVAL", "30"))
     if cycle_duration > poll_interval * 0.8:
-        logger.warning("Cycle %.1fs > 80%% poll_interval (%ds)",
-                       cycle_duration, poll_interval)
+        logger.warning(
+            "Cycle %.1fs > 80%% poll_interval (%ds)", cycle_duration, poll_interval
+        )
 
 
 async def main() -> None:
     """Haupt-Loop mit Error-Handling."""
     init_logging()
 
+    # Check topic
     topic = os.environ.get("HUAWEI_MODBUS_MQTT_TOPIC")
-
     if not topic:
         logger.error("HUAWEI_MODBUS_MQTT_TOPIC missing")
         sys.exit(1)
 
-    # Config
+    # Check host
     host = os.environ.get("HUAWEI_MODBUS_HOST")
+    if not host:
+        logger.error("HUAWEI_MODBUS_HOST missing")
+        sys.exit(1)
+
     port = int(os.environ.get("HUAWEI_MODBUS_PORT", "502"))
     slave_id = int(os.environ.get("HUAWEI_SLAVE_ID", "1"))
 
@@ -282,20 +292,19 @@ async def main() -> None:
             logger.debug(f"Cycle #{cycle_count}")
 
             try:
-                await main_once(client, cycle_count)  # ← cycle_count übergeben
+                await main_once(client, cycle_count)
                 error_tracker.mark_success()
                 publish_status("online", topic)
             except asyncio.TimeoutError as e:
                 error_tracker.track_error("timeout", str(e))
                 publish_status("offline", topic)
                 await asyncio.sleep(10)
-            except (ModbusException, ExceptionResponse) as e:
+            except (ModbusException, ExceptionResponse) as e:  # type: ignore[misc]
                 error_tracker.track_error("modbus_exception", str(e))
                 publish_status("offline", topic)
                 await asyncio.sleep(10)
             except ConnectionRefusedError as e:
-                error_tracker.track_error(
-                    "connection_refused", f"Errno {e.errno}")
+                error_tracker.track_error("connection_refused", f"Errno {e.errno}")
                 publish_status("offline", topic)
                 await asyncio.sleep(10)
             except Exception as e:

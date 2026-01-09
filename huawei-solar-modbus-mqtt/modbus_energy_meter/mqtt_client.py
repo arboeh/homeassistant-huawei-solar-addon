@@ -65,8 +65,7 @@ def disconnect_mqtt() -> None:
         topic = os.environ.get("HUAWEI_MODBUS_MQTT_TOPIC")
         if topic:
             # explizit offline setzen, bevor Verbindung beendet wird
-            _mqtt_client.publish(
-                f"{topic}/status", "offline", qos=1, retain=True)
+            _mqtt_client.publish(f"{topic}/status", "offline", qos=1, retain=True)
             time.sleep(0.1)
         _mqtt_client.loop_stop()
         _mqtt_client.disconnect()
@@ -77,8 +76,9 @@ def disconnect_mqtt() -> None:
         _mqtt_client = None
 
 
-def _build_sensor_config(sensor: Dict[str, Any], base_topic: str,
-                         device_config: Dict[str, Any]) -> Dict[str, Any]:
+def _build_sensor_config(
+    sensor: Dict[str, Any], base_topic: str, device_config: Dict[str, Any]
+) -> Dict[str, Any]:
     """Build discovery config for single sensor."""
     config = {
         "name": sensor["name"],
@@ -86,17 +86,22 @@ def _build_sensor_config(sensor: Dict[str, Any], base_topic: str,
         "state_topic": base_topic,
         "value_template": sensor.get(
             "value_template",
-            f"{{{{ value_json.{sensor['key']} }}}}"  # ← Standard-Fallback
+            f"{{{{ value_json.{sensor['key']} }}}}",  # ← Standard-Fallback
         ),
         "availability_topic": f"{base_topic}/status",
         "payload_available": "online",
         "payload_not_available": "offline",
-        "device": device_config
+        "device": device_config,
     }
 
     # Optional fields
-    for key in ["unit_of_measurement", "device_class", "state_class",
-                "icon", "entity_category"]:
+    for key in [
+        "unit_of_measurement",
+        "device_class",
+        "state_class",
+        "icon",
+        "entity_category",
+    ]:
         if key in sensor:
             config[key] = sensor[key]
 
@@ -116,9 +121,12 @@ def _load_text_sensors() -> List[Dict[str, Any]]:
     return TEXT_SENSORS
 
 
-def _publish_sensor_configs(client: mqtt.Client, base_topic: str,
-                            sensors: List[Dict[str, Any]],
-                            device_config: Dict[str, Any]) -> int:
+def _publish_sensor_configs(
+    client: mqtt.Client,
+    base_topic: str,
+    sensors: List[Dict[str, Any]],
+    device_config: Dict[str, Any],
+) -> int:
     """Publish sensor discovery configs."""
     count = 0
     for sensor in sensors:
@@ -138,7 +146,7 @@ def publish_discovery_configs(base_topic: str) -> None:
         "identifiers": ["huawei_solar_modbus"],
         "name": "Huawei Solar Inverter",
         "model": "SUN2000",
-        "manufacturer": "Huawei"
+        "manufacturer": "Huawei",
     }
 
     # Numeric sensors
@@ -149,7 +157,8 @@ def publish_discovery_configs(base_topic: str) -> None:
     # Text sensors
     text_sensors = _load_text_sensors()
     text_count = _publish_sensor_configs(
-        client, base_topic, text_sensors, device_config)
+        client, base_topic, text_sensors, device_config
+    )
     logger.debug(f"Published {text_count} text sensors")
 
     # Binary status sensor
@@ -158,8 +167,9 @@ def publish_discovery_configs(base_topic: str) -> None:
     logger.info(f"Discovery complete: {count + text_count + 1} entities")
 
 
-def _publish_status_sensor(client: mqtt.Client, base_topic: str,
-                           device_config: Dict[str, Any]) -> None:
+def _publish_status_sensor(
+    client: mqtt.Client, base_topic: str, device_config: Dict[str, Any]
+) -> None:
     """Publish binary connectivity sensor."""
     config = {
         "name": "Huawei Solar Status",
@@ -168,10 +178,14 @@ def _publish_status_sensor(client: mqtt.Client, base_topic: str,
         "payload_on": "online",
         "payload_off": "offline",
         "device_class": "connectivity",
-        "device": device_config
+        "device": device_config,
     }
-    client.publish("homeassistant/binary_sensor/huawei_solar/status/config",
-                   json.dumps(config), qos=1, retain=True)
+    client.publish(
+        "homeassistant/binary_sensor/huawei_solar/status/config",
+        json.dumps(config),
+        qos=1,
+        retain=True,
+    )
 
 
 def publish_data(data: Dict[str, Any], topic: str) -> None:
@@ -185,9 +199,11 @@ def publish_data(data: Dict[str, Any], topic: str) -> None:
     data["last_update"] = int(time.time())
 
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(f"Publishing: Solar={data.get('power_active', 'N/A')}W, "
-                     f"Grid={data.get('meter_power_active', 'N/A')}W, "
-                     f"Battery={data.get('battery_power', 'N/A')}W")
+        logger.debug(
+            f"Publishing: Solar={data.get('power_active', 'N/A')}W, "
+            f"Grid={data.get('meter_power_active', 'N/A')}W, "
+            f"Battery={data.get('battery_power', 'N/A')}W"
+        )
 
     try:
         result = client.publish(topic, json.dumps(data), qos=1, retain=True)
