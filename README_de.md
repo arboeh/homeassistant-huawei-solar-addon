@@ -87,7 +87,7 @@ Die Add-on-Konfiguration erfolgt über die Home Assistant UI mit übersetzten de
 
 **Symptom:** Connection Timeouts, "No response received", intermittierende Datenverluste
 
-**Ursache:** Huawei-Wechselrichter unterstützen **nur EINE Modbus TCP-Verbindung** gleichzeitig
+**Ursache:** Huawei-Wechselrichter unterstützen **nur EINE aktive Modbus TCP-Verbindung**
 
 **Lösung:**
 1. Prüfe **Einstellungen → Geräte & Dienste** auf andere Huawei-Integrationen
