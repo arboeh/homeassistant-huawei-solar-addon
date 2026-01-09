@@ -9,6 +9,16 @@
 [![i386](https://img.shields.io/badge/i386-yes-green.svg)](https://github.com/arboeh/homeassistant-huawei-solar-addon)
 [![release](https://img.shields.io/github/v/release/arboeh/homeassistant-huawei-solar-addon?display_name=tag)](https://github.com/arboeh/homeassistant-huawei-solar-addon/releases/latest)
 
+> **⚠️ IMPORTANT: Single Modbus Connection Limit**  
+> Huawei inverters allow **only ONE active Modbus TCP connection** at a time. This is a common beginner mistake when integrating solar systems into smart home environments.
+>
+> **Before installing this add-on:**
+> - ✅ Disable or remove any other Huawei Solar integrations (official wlcrs/huawei_solar, HACS integrations, etc.)
+> - ✅ Ensure no other software is accessing Modbus TCP (monitoring tools, apps, other Home Assistant instances)
+> - ✅ Note: FusionSolar Cloud may show "Abnormal communication" when Modbus is active - this is expected
+>
+> Running multiple Modbus connections simultaneously will cause **connection timeouts and data loss** for all clients!
+
 Home Assistant Add-on for Huawei SUN2000 inverters via Modbus TCP → MQTT with Auto-Discovery.
 
 **Version 1.4.2** – 58 Essential Registers, 69+ entities, ~2–5 s cycle time  
@@ -72,6 +82,23 @@ Add-on configuration via Home Assistant UI with translated field names:
 **Previous (1.4.0):** Error tracker with downtime tracking, improved logging architecture, poll interval default optimized to 30s
 
 ## Troubleshooting
+
+### ⚠️ Multiple Modbus Connections (Most Common Issue!)
+
+**Symptom:** Connection timeouts, "No response received", intermittent data loss
+
+**Cause:** Huawei inverters support **only ONE Modbus TCP connection** at a time
+
+**Solution:**
+1. Check **Settings → Devices & Services** for other Huawei integrations
+2. Remove or disable:
+   - Official `wlcrs/huawei_solar` integration
+   - Any HACS-based Huawei integrations
+   - Third-party monitoring software
+3. If using **FusionSolar Cloud**: Note that active Modbus may show "Abnormal communication" in the app - this is normal and expected
+4. Only **ONE** system can connect to Modbus at any time
+
+### Other Common Issues
 
 **No Connection:** Enable Modbus TCP, verify IP/Slave-ID (try 1/16/0), set Log Level to `DEBUG`  
 **Connection Timeouts:** Try different Slave IDs (`0`, `1`, `16`); increase Poll Interval to 60s; check if FusionSolar Cloud is blocking Modbus access  
