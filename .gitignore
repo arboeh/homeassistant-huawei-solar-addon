@@ -1,3 +1,61 @@
-.gitignore
-.vscode/code-explorer.json
-.vscode/settings.json
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE - VS Code
+.vscode/
+*.code-workspace
+
+# IDE - PyCharm
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Environment Variables
+.env
+.env.local
+*.secret
+
+# Temporary Files
+*.tmp
+*.bak
+tmp/
+temp/
+
+# Home Assistant specific
+secrets.yaml
+home-assistant.log
+home-assistant_v2.db
+*.db-shm
+*.db-wal
