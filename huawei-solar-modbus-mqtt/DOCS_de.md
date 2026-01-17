@@ -1,8 +1,8 @@
 # Huawei Solar Modbus to MQTT
 
 > **⚠️ KRITISCH: Nur EINE Modbus-Verbindung erlaubt!**  
->
-> Huawei-Wechselrichter haben eine **fundamentale Einschränkung**: Sie erlauben **nur EINE aktive Modbus TCP-Verbindung** zur selben Zeit. Dies ist eine **Hardware-Limitierung** und der häufigste Fehler bei der Smart-Home-Integration.
+> 
+> Huawei-Wechselrichter erlauben **nur EINE aktive Modbus TCP-Verbindung** zur selben Zeit. Dies ist eine **Hardware-Limitierung** und der häufigste Fehler bei der Smart-Home-Integration.
 >
 > ### Typische Fehlerszenarien:
 >
@@ -42,12 +42,13 @@ Dieses Add-on liest Daten deines Huawei SUN2000 Wechselrichters per Modbus TCP a
 ## Funktionen
 
 - **Schnelle Modbus TCP Verbindung** zum Huawei SUN2000 Inverter
-  - 58 Essential Registers (kritische Werte + erweiterte Daten)
+  - 57 Essential Registers (kritische Werte + erweiterte Daten)
   - Typische Cycle-Time: 2-5 Sekunden
   - Empfohlenes Poll-Interval: 30-60 Sekunden
 - Veröffentlichung der Messwerte auf einem MQTT-Topic als JSON
 - Automatische Erstellung von Home Assistant Entitäten via MQTT Discovery
 - **Error Tracking:** Intelligente Fehler-Aggregation mit Downtime-Tracking
+- **MQTT-Stabilität:** Connection Wait-Loop und Retry-Logik für zuverlässiges Publishing (v1.5.0)
 - Unterstützung für:
   - PV-Leistungen (PV1-4 mit Spannung und Strom)
   - Netzleistung (Import/Export, 3-phasig)
@@ -217,15 +218,22 @@ Diese Entitäten können in Home Assistant manuell aktiviert werden:
 
 ## Performance & Optimierung
 
-### Version 1.4.x - Aktuelle Optimierungen
+### Version 1.5.0 - Aktuelle Optimierungen
 
-**58 Essential Registers:**
+**57 Essential Registers:**
 
 - Erweiterte Register-Set mit allen wichtigen Werten
 - Typische Cycle-Time: 2-5 Sekunden
 - Empfohlenes Poll-Interval: **30-60 Sekunden**
 
-**Error Tracking (NEU in 1.4.0):**
+**MQTT-Verbindungsstabilität (NEU in 1.5.0):**
+
+- Wait-Loop und Retry-Logik für zuverlässige MQTT-Übertragung
+- Connection State Tracking verhindert "not connected" Fehler
+- Alle Publish-Operationen warten auf Bestätigung (1-2s Timeout)
+- Race Condition behoben durch 1-Sekunden-Wartezeit nach MQTT-Verbindung
+
+**Error Tracking (eingeführt in 1.4.0):**
 
 - Intelligente Fehler-Aggregation
 - Downtime-Tracking mit Recovery-Logging
@@ -243,7 +251,7 @@ Diese Entitäten können in Home Assistant manuell aktiviert werden:
 Das Add-on überwacht automatisch die Cycle-Performance:
 
 ```
-INFO - Essential read: 2.1s (58/58)
+INFO - Essential read: 2.1s (57/57)
 INFO - Published - Solar: 4500W | Grid: -200W | Battery: 800W (85.0%)
 DEBUG - Cycle: 2.3s (Modbus: 2.1s, Transform: 0.005s, MQTT: 0.194s)
 ```
@@ -276,20 +284,20 @@ INFO - Connection restored after 47s (3 failed attempts, 2 error types)
 **INFO (Standard)** - Übersichtlich für den normalen Betrieb:
 
 ```
-2026-01-09T08:00:00+0100 - huawei.main - INFO - 🚀 Starting Huawei Solar → MQTT
-2026-01-09T08:00:01+0100 - huawei.main - INFO - 🔌 Connected (Slave ID: 1)
-2026-01-09T08:00:02+0100 - huawei.main - INFO - Essential read: 2.1s (58/58)
-2026-01-09T08:00:02+0100 - huawei.main - INFO - Published - Solar: 4500W | Grid: -200W | Battery: 800W (85.0%)
+2026-01-16T12:00:00+0100 - huawei.main - INFO - 🚀 Starting Huawei Solar → MQTT
+2026-01-16T12:00:01+0100 - huawei.main - INFO - 🔌 Connected (Slave ID: 1)
+2026-01-16T12:00:02+0100 - huawei.main - INFO - Essential read: 2.1s (57/57)
+2026-01-16T12:00:02+0100 - huawei.main - INFO - Published - Solar: 4500W | Grid: -200W | Battery: 800W (85.0%)
 ```
 
 **DEBUG** - Detailliert mit Performance-Metriken:
 
 ```
-2026-01-09T08:00:02+0100 - huawei.main - DEBUG - Cycle #1
-2026-01-09T08:00:02+0100 - huawei.main - DEBUG - Reading 58 essential registers
-2026-01-09T08:00:03+0100 - huawei.main - INFO - Essential read: 2.1s (58/58)
-2026-01-09T08:00:03+0100 - huawei.transform - DEBUG - Transforming 58 registers
-2026-01-09T08:00:03+0100 - huawei.main - DEBUG - Cycle: 2.3s (Modbus: 2.1s, Transform: 0.005s, MQTT: 0.194s)
+2026-01-16T12:00:02+0100 - huawei.main - DEBUG - Cycle #1
+2026-01-16T12:00:02+0100 - huawei.main - DEBUG - Reading 57 essential registers
+2026-01-16T12:00:03+0100 - huawei.main - INFO - Essential read: 2.1s (57/57)
+2026-01-16T12:00:03+0100 - huawei.transform - DEBUG - Transforming 57 registers
+2026-01-16T12:00:03+0100 - huawei.main - DEBUG - Cycle: 2.3s (Modbus: 2.1s, Transform: 0.005s, MQTT: 0.194s)
 ```
 
 ### Add-on Logs ansehen
@@ -298,7 +306,7 @@ INFO - Connection restored after 47s (3 failed attempts, 2 error types)
 
 ### Typische Fehler & Lösungen
 
-#### Connection Timeout Fehler (NEU)
+#### Connection Timeout Fehler
 
 **Symptom:**
 
@@ -349,7 +357,7 @@ ERROR - Connection failed: [Errno 111] Connection refused
 **Symptom:**
 
 ```
-ERROR - MQTT publish failed: [Errno 111] Connection refused
+ERROR - MQTT publish failed: not connected
 ```
 
 **Lösungen:**
@@ -455,7 +463,9 @@ Das Add-on verfügt über einen integrierten Health Check:
 - Status sichtbar in: **Einstellungen → Add-ons → Huawei Solar → Status**
 - Bei `unhealthy` → Add-on neu starten
 
-Vollständiger Changelog: [CHANGELOG.md](https://github.com/arboeh/homeassistant-huawei-solar-addon/blob/main/huawei-solar-modbus-mqtt/CHANGELOG.md)
+## Changelog & Updates
+
+Vollständiger Changelog: [CHANGELOG.md](CHANGELOG.md)
 
 ## Support & Weiterentwicklung
 

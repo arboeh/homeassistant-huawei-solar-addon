@@ -1,6 +1,6 @@
 # Huawei Solar Modbus → Home Assistant via MQTT
 
-🌐 [English](README.md) | 🇩🇪 **Deutsch**
+[🇬🇧 English](README.md) | 🇩🇪 **Deutsch**
 
 [![aarch64](https://img.shields.io/badge/aarch64-yes-green.svg)](https://github.com/arboeh/homeassistant-huawei-solar-addon)
 [![amd64](https://img.shields.io/badge/amd64-yes-green.svg)](https://github.com/arboeh/homeassistant-huawei-solar-addon)
@@ -21,7 +21,7 @@
 
 Home Assistant Add-on für Huawei SUN2000 Wechselrichter via Modbus TCP → MQTT mit Auto-Discovery.
 
-**Version 1.4.2** – 58 Essential Registers, 69+ Entitäten, ~2–5 s Zykluszeit  
+**Version 1.5.0** – 57 Essential Registers, 69+ Entitäten, ~2–5 s Zykluszeit  
 **Changelog** - [CHANGELOG.md](huawei-solar-modbus-mqtt/CHANGELOG.md)
 
 ## Features
@@ -30,6 +30,7 @@ Home Assistant Add-on für Huawei SUN2000 Wechselrichter via Modbus TCP → MQTT
 - **Vollständiges Monitoring:** Batterie, PV (1-4), Netz (3-Phasen), Ertrag, Grid Power
 - **Performance:** ~2-5s Cycle, konfigurierbar (30-60s empfohlen)
 - **Error Tracking:** Intelligente Fehler-Aggregation mit Downtime-Tracking
+- **MQTT-Stabilität:** Connection Wait-Loop und Retry-Logik für zuverlässiges Publishing
 - **Optimiertes Logging:** Bashio Log-Level Synchronisation
 - **Plattformübergreifend:** Unterstützt alle gängigen Architekturen (aarch64, amd64, armhf, armv7, i386)
 
@@ -57,6 +58,38 @@ Die Add-on-Konfiguration erfolgt über die Home Assistant UI mit übersetzten de
 
 **Auto-MQTT:** MQTT Broker, Benutzername und Passwort leer lassen → nutzt HA MQTT Service automatisch
 
+### MQTT Topics
+
+- **Messdaten (JSON)**: `huawei-solar` (oder dein konfiguriertes Topic)  
+  Enthält alle Sensordaten als JSON-Objekt mit `last_update` Timestamp.
+  
+- **Status (online/offline)**: `huawei-solar/status`  
+  Wird genutzt für Binary Sensor, `availability_topic`, und Last Will Testament.
+
+### Example MQTT Payload
+
+Published to topic `huawei-solar`:
+
+```json
+{
+  "poweractive": 1609,
+  "powerinput": 2620,
+  "batterysoc": 32,
+  "batterypower": 1020,
+  "meterpoweractive": 50,
+  "voltagegridA": 239.3,
+  "invertertemperature": 32.4,
+  "inverterstatus": "On-grid",
+  "modelname": "SUN2000-6KTL-M1",
+  "lastupdate": 1768649491
+  .....
+  ...
+  .
+}
+```
+
+Complete example with all 58+ data points: [examples/mqtt_payload.json](examples/mqtt_payload.json)
+
 ## Wichtige Entitäten
 
 | Kategorie   | Sensoren                                                                                 |
@@ -69,17 +102,17 @@ Die Add-on-Konfiguration erfolgt über die Home Assistant UI mit übersetzten de
 | **Device**  | `model_name`, `serial_number`, `efficiency`, `temperature`, `rated_power`                |
 | **Status**  | `inverter_status`, `battery_status`, `meter_status`                                      |
 
-## Was ist neu in 1.4.2?
+## Was ist neu in 1.5.0?
 
-**Repository-Wartung:** `.gitattributes`, `.editorconfig` und `.gitignore` für besseren Entwicklungs-Workflow hinzugefügt; alle Dateien auf LF Line-Endings normalisiert (verhindert Linux/Docker-Kompatibilitätsprobleme)
+**MQTT-Verbindungsstabilität:** Wait-Loop und Retry-Logik für zuverlässige MQTT-Übertragung verhindert "not connected" Fehler; Connection State Tracking mit korrekten Callbacks; alle Publish-Operationen warten auf Bestätigung
 
-**Behoben:** `pymodbus` Dependency-Version korrigiert; `.dockerignore` verbessert, um erforderliche Home Assistant Dokumentationsdateien einzuschließen
+**Entwicklungsverbesserungen:** PowerShell-Runner (`run_local.ps1`) für lokales Testen unter Windows; `.env`-Datei-Support für einfache Konfiguration; verbessertes Exception-Handling für Modbus-Fehler
 
-**Dokumentation:** GitHub Issue Templates für strukturierte Bug-Reports und Feature-Requests hinzugefügt; Troubleshooting-Guide für Connection-Timeout-Probleme
+**Vorher (1.4.2):** Repository-Wartung - `.gitattributes`, `.editorconfig`, GitHub Issue Templates; `pymodbus` Dependency-Version korrigiert
 
-**Vorher (1.4.1):** Verbessertes Startup-Logging mit Emoji-Icons, visuelle Trennlinien, dynamische Log-Level-Synchronisation
+**Vorher (1.4.1):** Verbessertes Startup-Logging mit Emoji-Icons, visuelle Trennlinien
 
-**Vorher (1.4.0):** Error Tracker mit Downtime-Tracking, verbesserte Logging-Architektur, Abfrageintervall Standard auf 30s optimiert
+**Vorher (1.4.0):** Error Tracker mit Downtime-Tracking, Abfrageintervall auf 30s optimiert
 
 ## Fehlerbehebung
 
@@ -113,8 +146,8 @@ Bug gefunden oder Feature-Wunsch? Bitte nutze unsere [GitHub Issue Templates](ht
 
 ## Dokumentation
 
-- **[DOCS.md](huawei-solar-modbus-mqtt/DOCS.md)** - Vollständige Dokumentation
-- **[CHANGELOG.md](huawei-solar-modbus-mqtt/CHANGELOG.md)** - Versionshistorie
+- 🇩🇪 **[DOCS_de.md](huawei-solar-modbus-mqtt/DOCS_de.md)** - Vollständige Dokumentation
+- 🇬🇧 **[DOCS.md](huawei-solar-modbus-mqtt/DOCS.md)** - Complete Documentation
 
 ## Credits
 

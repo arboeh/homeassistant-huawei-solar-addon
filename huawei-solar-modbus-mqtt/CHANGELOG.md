@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.5.0 - 2026-01-16
+
+### Added
+
+- **MQTT Connection Stability**: Wait loop and retry logic for reliable MQTT publishing
+- **Connection State Tracking**: Global `_is_connected` flag prevents "not connected" errors
+- **Development Environment**: PowerShell runner (`run_local.ps1`) and `.env` support for local testing
+- **Exception Handling**: Improved Modbus exception handling with `is_modbus_exception()` helper
+
+### Fixed
+
+- **MQTT Publish Failures**: Added `wait_for_publish()` to all MQTT operations
+- **Race Condition**: 1-second delay after MQTT connect ensures stable connection before publishing
+- **paho-mqtt 2.x Support**: Version-compatible client creation with `CallbackAPIVersion.VERSION2`
+
+### Changed
+
+- **MQTT Client**: Callbacks now properly update connection state for reliable publish operations
+- **Connection Timeout**: Increased from implicit to explicit 10-second wait with proper error handling
+
+### Technical Details
+
+- Connection wait loop polls `_is_connected` flag every 100ms up to 10 seconds
+- All `publish()` calls now wait for confirmation with 1-2 second timeout
+- Exception handling no longer uses `isinstance()` directly in except clauses to avoid BaseException errors
+
 ## [1.4.2] - 2026-01-09
 
 ### Added
@@ -142,5 +168,5 @@
 
 ## [1.3.0] - 2025-12-09
 
-**Config:** Configuration moved to config/ (registers.py, mappings.py, sensors_mqtt.py) with 47 Essential Registers and 58 sensors  
+**Config:** Configuration moved to config/ (registers.py, mappings.py, sensors_mqtt.py) with 47 Essential Registers and 57 sensors  
 **Registers:** Five new registers (including smart meter power, battery today, meter status, grid reactive power) and 13 additional entities for battery bus and grid details

@@ -2,28 +2,29 @@
 
 VERSION=$(bashio::addon.version)
 
-bashio::log.info "=================================================================="
-bashio::log.info " 🌞 Huawei Solar Modbus MQTT v${VERSION}"
-bashio::log.info " 📦 https://github.com/arboeh/homeassistant-huawei-solar-addon"
-bashio::log.info "=================================================================="
-bashio::log.info ">> Starting Huawei Solar Modbus MQTT Add-on..."
+# Banner IMMER anzeigen
+echo "[$(date +'%T')] INFO: =================================================================="
+echo "[$(date +'%T')] INFO:  🌞 Huawei Solar Modbus MQTT v${VERSION}"
+echo "[$(date +'%T')] INFO:  📦 https://github.com/arboeh/homeassistant-huawei-solar-addon"
+echo "[$(date +'%T')] INFO: =================================================================="
+echo "[$(date +'%T')] INFO: >> Starting Huawei Solar Modbus MQTT Add-on..."
+echo "[$(date +'%T')] INFO: >> Log level: $(bashio::config 'log_level')"
 
 # Modbus Configuration
 export HUAWEI_MODBUS_HOST=$(bashio::config 'modbus_host')
 export HUAWEI_MODBUS_PORT=$(bashio::config 'modbus_port')
 export HUAWEI_SLAVE_ID=$(bashio::config 'slave_id')
 
-# MQTT + Topic + Intervals
+# MQTT Topic & Intervals
 export HUAWEI_MODBUS_MQTT_TOPIC=$(bashio::config 'mqtt_topic')
 export HUAWEI_STATUS_TIMEOUT=$(bashio::config 'status_timeout')
 export HUAWEI_POLL_INTERVAL=$(bashio::config 'poll_interval')
 
 # Log Level Configuration
 export HUAWEI_LOG_LEVEL=$(bashio::config 'log_level')
-bashio::log.info ">> Log level: $HUAWEI_LOG_LEVEL"
 
 # Set bashio log level to match
-case "$HUAWEI_LOG_LEVEL" in
+case "${HUAWEI_LOG_LEVEL}" in
 DEBUG)
 	bashio::log.level debug
 	;;
@@ -38,45 +39,67 @@ ERROR)
 	;;
 esac
 
-# MQTT Broker: Custom or HA Service
+# MQTT Broker (Custom or HA Service) - nur für Export, kein echo
 if bashio::config.has_value 'mqtt_host' && [ -n "$(bashio::config 'mqtt_host')" ]; then
 	export HUAWEI_MODBUS_MQTT_BROKER=$(bashio::config 'mqtt_host')
-	bashio::log.info ">> Using custom MQTT broker: $HUAWEI_MODBUS_MQTT_BROKER"
+	MQTT_SOURCE="custom"
 else
-	export HUAWEI_MODBUS_MQTT_BROKER=$(bashio::services 'mqtt' 'host')
-	bashio::log.info ">> Using HA MQTT service: $HUAWEI_MODBUS_MQTT_BROKER"
+	export HUAWEI_MODBUS_MQTT_BROKER=$(bashio::services mqtt "host")
+	MQTT_SOURCE="HA service"
 fi
 
 # MQTT Port
 if bashio::config.has_value 'mqtt_port' && [ -n "$(bashio::config 'mqtt_port')" ]; then
 	export HUAWEI_MODBUS_MQTT_PORT=$(bashio::config 'mqtt_port')
 else
-	export HUAWEI_MODBUS_MQTT_PORT=$(bashio::services 'mqtt' 'port')
+	export HUAWEI_MODBUS_MQTT_PORT=$(bashio::services mqtt "port")
 fi
 
 # MQTT User
 if bashio::config.has_value 'mqtt_user' && [ -n "$(bashio::config 'mqtt_user')" ]; then
 	export HUAWEI_MODBUS_MQTT_USER=$(bashio::config 'mqtt_user')
+	MQTT_AUTH="custom"
 else
-	export HUAWEI_MODBUS_MQTT_USER=$(bashio::services 'mqtt' 'username')
+	export HUAWEI_MODBUS_MQTT_USER=$(bashio::services mqtt "username")
+	MQTT_AUTH="HA service"
 fi
 
 # MQTT Password
 if bashio::config.has_value 'mqtt_password' && [ -n "$(bashio::config 'mqtt_password')" ]; then
 	export HUAWEI_MODBUS_MQTT_PASSWORD=$(bashio::config 'mqtt_password')
 else
-	export HUAWEI_MODBUS_MQTT_PASSWORD=$(bashio::services 'mqtt' 'password')
+	export HUAWEI_MODBUS_MQTT_PASSWORD=$(bashio::services mqtt "password")
 fi
 
-# Connection Summary
-bashio::log.info "------------------------------------------------------------------"
-bashio::log.info " 🔌 Inverter: ${HUAWEI_MODBUS_HOST}:${HUAWEI_MODBUS_PORT} (Slave ID: ${HUAWEI_SLAVE_ID})"
-bashio::log.info " 📡 MQTT: ${HUAWEI_MODBUS_MQTT_BROKER}:${HUAWEI_MODBUS_MQTT_PORT}"
-bashio::log.info " 📍 Topic: ${HUAWEI_MODBUS_MQTT_TOPIC}"
-bashio::log.info " ⏱️ Poll: ${HUAWEI_POLL_INTERVAL}s | Timeout: ${HUAWEI_STATUS_TIMEOUT}s"
-bashio::log.info "------------------------------------------------------------------"
+# Connection Summary - IMMER anzeigen (nur hier, nicht vorher!)
+echo "[$(date +'%T')] INFO: ------------------------------------------------------------------"
+echo "[$(date +'%T')] INFO:  🔌 Inverter: ${HUAWEI_MODBUS_HOST}:${HUAWEI_MODBUS_PORT} (Slave ID: ${HUAWEI_SLAVE_ID})"
+echo "[$(date +'%T')] INFO:  📡 MQTT: ${HUAWEI_MODBUS_MQTT_BROKER}:${HUAWEI_MODBUS_MQTT_PORT} (${MQTT_SOURCE})"
+
+# Zeige MQTT Auth Status (ohne Credentials zu leaken)
+if [ -n "${HUAWEI_MODBUS_MQTT_USER}" ]; then
+	echo "[$(date +'%T')] INFO:  🔐 Auth: enabled (${MQTT_AUTH})"
+else
+	echo "[$(date +'%T')] INFO:  🔐 Auth: disabled"
+fi
+
+echo "[$(date +'%T')] INFO:  📍 Topic: ${HUAWEI_MODBUS_MQTT_TOPIC}"
+echo "[$(date +'%T')] INFO:  ⏱️  Poll: ${HUAWEI_POLL_INTERVAL}s | Timeout: ${HUAWEI_STATUS_TIMEOUT}s"
+
+# Registerzähler
+REGISTER_COUNT=58
+echo "[$(date +'%T')] INFO:  📊 Registers: ${REGISTER_COUNT} essential"
+
+echo "[$(date +'%T')] INFO: ------------------------------------------------------------------"
+
+# System-Info
+echo "[$(date +'%T')] INFO: >> System Info:"
+echo "[$(date +'%T')] INFO:    - Python: $(python3 --version | cut -d' ' -f2)"
+echo "[$(date +'%T')] INFO:    - huawei-solar: $(python3 -c "import huawei_solar; print(huawei_solar.__version__)" 2>/dev/null || echo "unknown")"
+echo "[$(date +'%T')] INFO:    - Architecture: $(uname -m)"
+
+echo "[$(date +'%T')] INFO: >> Starting Python application..."
 
 # Start Python application
-bashio::log.info ">> Starting Python application..."
-cd /app
+cd /app || exit 1
 exec python3 -u -m modbus_energy_meter.main

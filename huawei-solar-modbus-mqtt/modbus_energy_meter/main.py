@@ -7,9 +7,16 @@ import time
 from typing import Dict, Any
 
 from huawei_solar import AsyncHuaweiSolar  # type: ignore
-from pymodbus.exceptions import ModbusException  # type: ignore
-from pymodbus.pdu import ExceptionResponse  # type: ignore
 from .error_tracker import ConnectionErrorTracker
+
+try:
+    from pymodbus.exceptions import ModbusException  # type: ignore
+    from pymodbus.pdu import ExceptionResponse  # type: ignore
+
+    MODBUS_EXCEPTIONS = (ModbusException, ExceptionResponse)
+except ImportError:
+    # Fallback wenn pymodbus nicht verfügbar
+    MODBUS_EXCEPTIONS = ()
 
 from .config.registers import ESSENTIAL_REGISTERS
 from .mqtt_client import (
@@ -168,6 +175,13 @@ async def read_registers(client: AsyncHuaweiSolar) -> Dict[str, Any]:
     return data
 
 
+def is_modbus_exception(exc: Exception) -> bool:
+    """Check if exception is a Modbus-related error."""
+    if not MODBUS_EXCEPTIONS:
+        return False
+    return isinstance(exc, MODBUS_EXCEPTIONS)
+
+
 async def main_once(client: AsyncHuaweiSolar, cycle_num: int) -> None:
     """Read essential registers and publish."""
     global LAST_SUCCESS
@@ -183,11 +197,12 @@ async def main_once(client: AsyncHuaweiSolar, cycle_num: int) -> None:
     try:
         data = await read_registers(client)
         modbus_duration = time.time() - modbus_start
-    except (ModbusException, ExceptionResponse) as e:  # type: ignore[misc]
-        logger.warning(f"Read failed after {time.time() - start:.1f}s: {e}")
-        raise
     except Exception as e:
-        logger.error(f"Read error: {e}")
+        # Check if it's a Modbus exception
+        if is_modbus_exception(e):
+            logger.warning(f"Modbus read failed after {time.time() - start:.1f}s: {e}")
+        else:
+            logger.error(f"Read error: {e}")
         raise
 
     if not data:
@@ -258,6 +273,9 @@ async def main() -> None:
     # MQTT einmal verbinden (persistent)
     try:
         connect_mqtt()
+        import time
+
+        time.sleep(1)
     except Exception as e:
         logger.error(f"MQTT connect failed: {e}")
         sys.exit(1)

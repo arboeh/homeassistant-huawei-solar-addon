@@ -1,6 +1,6 @@
 # Huawei Solar Modbus → Home Assistant via MQTT
 
-🌐 **English** | 🇩🇪 [Deutsch](README_de.md)
+🇬🇧 **English** | [🇩🇪 Deutsch](README_de.md)
 
 [![aarch64](https://img.shields.io/badge/aarch64-yes-green.svg)](https://github.com/arboeh/homeassistant-huawei-solar-addon)
 [![amd64](https://img.shields.io/badge/amd64-yes-green.svg)](https://github.com/arboeh/homeassistant-huawei-solar-addon)
@@ -21,7 +21,7 @@
 
 Home Assistant Add-on for Huawei SUN2000 inverters via Modbus TCP → MQTT with Auto-Discovery.
 
-**Version 1.4.2** – 58 Essential Registers, 69+ entities, ~2–5 s cycle time  
+**Version 1.5.0** – 57 Essential Registers, 69+ entities, ~2–5 s cycle time  
 **Changelog** - [CHANGELOG.md](huawei-solar-modbus-mqtt/CHANGELOG.md)
 
 ## Features
@@ -30,8 +30,25 @@ Home Assistant Add-on for Huawei SUN2000 inverters via Modbus TCP → MQTT with 
 - **Complete Monitoring:** Battery, PV (1-4), Grid (3-phase), Yield, Grid Power
 - **Performance:** ~2-5s cycle, configurable (30-60s recommended)
 - **Error Tracking:** Intelligent error aggregation with downtime tracking
+- **MQTT Stability:** Connection wait loop and retry logic for reliable publishing
 - **Optimized Logging:** Bashio log level synchronization
 - **Cross-Platform:** Supports all major architectures (aarch64, amd64, armhf, armv7, i386)
+
+## Screenshots
+
+### Home Assistant Integration
+
+![Diagnostic Entities](screenshots/diagnostics.png)
+
+*Diagnostic entities showing inverter status, temperature, and battery information*
+
+![Sensor Overview](screenshots/sensors.png)
+
+*Complete sensor overview with real-time power, energy, and grid data*
+
+![MQTT Device Info](screenshots/mqtt-info.png)
+
+*MQTT device integration details*
 
 ## Installation
 
@@ -57,6 +74,38 @@ Add-on configuration via Home Assistant UI with translated field names:
 
 **Auto-MQTT:** Leave MQTT Broker, Username and Password empty → uses HA MQTT Service automatically
 
+### MQTT Topics
+
+- **Messdaten (JSON)**: `huawei-solar` (oder dein konfiguriertes Topic)  
+Enthält alle Sensordaten als JSON-Objekt mit `last_update` Timestamp.
+  
+- **Status (online/offline)**: `huawei-solar/status`  
+  Wird genutzt für Binary Sensor, `availability_topic`, und Last Will Testament.
+
+### Example MQTT Payload
+
+Published to topic `huawei-solar`:
+
+```json
+{
+  "poweractive": 1609,
+  "powerinput": 2620,
+  "batterysoc": 32,
+  "batterypower": 1020,
+  "meterpoweractive": 50,
+  "voltagegridA": 239.3,
+  "invertertemperature": 32.4,
+  "inverterstatus": "On-grid",
+  "modelname": "SUN2000-6KTL-M1",
+  "lastupdate": 1768649491
+  .....
+  ..
+  .
+}
+```
+
+Complete example with all 58+ data points: [examples/mqtt_payload.json](examples/mqtt-payload.json)
+
 ## Important Entities
 
 | Category    | Sensors                                                                                  |
@@ -69,17 +118,17 @@ Add-on configuration via Home Assistant UI with translated field names:
 | **Device**  | `model_name`, `serial_number`, `efficiency`, `temperature`, `rated_power`                |
 | **Status**  | `inverter_status`, `battery_status`, `meter_status`                                      |
 
-## What's new in 1.4.2?
+## What's new in 1.5.0?
 
-**Repository Maintenance:** Added `.gitattributes`, `.editorconfig`, and `.gitignore` for better development workflow; normalized all files to LF line endings (prevents Linux/Docker compatibility issues)
+**MQTT Connection Stability:** Wait loop and retry logic for reliable MQTT publishing prevents "not connected" errors; connection state tracking with proper callbacks; all publish operations now wait for confirmation
 
-**Fixed:** Corrected `pymodbus` dependency version requirement; enhanced `.dockerignore` to include required Home Assistant documentation files
+**Development Improvements:** PowerShell runner (`run_local.ps1`) for Windows local testing; `.env` file support for easy configuration; improved exception handling for Modbus errors
 
-**Documentation:** Added GitHub Issue Templates for structured bug reports and feature requests; troubleshooting guide for connection timeout issues
+**Previous (1.4.2):** Repository maintenance - `.gitattributes`, `.editorconfig`, GitHub Issue Templates; fixed `pymodbus` dependency version
 
-**Previous (1.4.1):** Enhanced startup logging with emoji icons, visual separators, dynamic log level synchronization
+**Previous (1.4.1):** Enhanced startup logging with emoji icons, visual separators
 
-**Previous (1.4.0):** Error tracker with downtime tracking, improved logging architecture, poll interval default optimized to 30s
+**Previous (1.4.0):** Error tracker with downtime tracking, optimized poll interval to 30s
 
 ## Troubleshooting
 
@@ -113,8 +162,8 @@ Found a bug or have a feature request? Please use our [GitHub Issue Templates](h
 
 ## Documentation
 
-- **[DOCS.md](huawei-solar-modbus-mqtt/DOCS.md)** - Complete documentation (German)
-- **[CHANGELOG.md](huawei-solar-modbus-mqtt/CHANGELOG.md)** - Version history
+- 🇬🇧 **[DOCS.md](huawei-solar-modbus-mqtt/DOCS.md)** - Complete Documentation
+- 🇩🇪 **[DOCS_de.md](huawei-solar-modbus-mqtt/DOCS_de.md)** - Vollständige Dokumentation
 
 ## Credits
 
