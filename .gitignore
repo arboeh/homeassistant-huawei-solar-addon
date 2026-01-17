@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
+*.pyc
 
 # Virtual Environments
 venv/
@@ -11,16 +12,27 @@ env/
 ENV/
 .venv
 
+# Environment Variables (NEU!)
+.env
+.env.*
+*.env
+.env.local
+.env.production
+
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.settings/
 
 # OS
 .DS_Store
 Thumbs.db
+.Spotlight-V100
+.Trashes
 
 # Build artifacts
 build/
@@ -32,3 +44,23 @@ dist/
 
 # Home Assistant specific
 secrets.yaml
+home-assistant.log
+home-assistant_v2.db
+
+# Testing (NEU!)
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Docker (NEU!)
+.dockerignore.backup
+
+# Temporary files (NEU!)
+*.tmp
+*.bak
+*.swp
+*~
+
+# Git (NEU!)
+*.orig
